@@ -1,0 +1,6 @@
+root = true
+
+[*.cs]
+# Require 'this.' prefix when accessing fields
+# This makes shadowing obvious: local vars won't have 'this.', fields will
+dotnet_style_qualification_for_field = true:warning
