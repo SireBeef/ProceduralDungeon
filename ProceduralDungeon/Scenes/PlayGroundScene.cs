@@ -17,6 +17,8 @@ public class PlayGroundScene : Scene
     float yaw = 0f;   // Y-axis rotation (left/right)
     float pitch = 0f; // X-axis rotation (up/down)
 
+    Point lastMousePosition;
+
     Vector3 pillarOnePositionOriginBottom;
 
     // Responsible for taking 3d and turning it into 2D
@@ -37,13 +39,15 @@ public class PlayGroundScene : Scene
     Model coloredBox;
     Model rockyBox;
 
+
+
     public override void Initialize()
     {
         // LoadContent is called during base.Initialize().
         base.Initialize();
 
         Core.ExitOnEscape = true;
-        Core.Instance.IsMouseVisible = false;
+        Core.Instance.IsMouseVisible = true;
 
         // Set up Camera
         camPosition = new Vector3(0f, .7f, 6f);
@@ -53,10 +57,15 @@ public class PlayGroundScene : Scene
         projectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(45), Core.GraphicsDevice.DisplayMode.AspectRatio, 0.1f, 1000f);
         viewMatrix = Matrix.CreateLookAt(camPosition, GetCamTarget(), Vector3.Up);
 
-        Mouse.SetPosition((int)Core.Graphics.PreferredBackBufferWidth / 2, (int)Core.Graphics.PreferredBackBufferHeight / 2);
-
+        SetMouseToCenter();
         BuildMap();
 
+    }
+
+    private void SetMouseToCenter()
+    {
+        Mouse.SetPosition(Core.ViewportCenter.X, Core.ViewportCenter.Y);
+        lastMousePosition = Mouse.GetState().Position;
     }
 
     public override void LoadContent()
@@ -115,17 +124,47 @@ public class PlayGroundScene : Scene
         {
             camPosition += Vector3.Transform(Vector3.Backward, fullRotation) * MOVEMENT_SPEED;
         }
+
         float millis = (float)gameTime.ElapsedGameTime.TotalMilliseconds / 1000;
 
-        if (Mouse.GetState().X != GraphicsDeviceManager.DefaultBackBufferWidth / 2 || Mouse.GetState().Y != GraphicsDeviceManager.DefaultBackBufferHeight / 2)
+        MouseState mouseMonitorPosition = Mouse.GetState();
+
+        // Full screen
+        // viewPort X: 0
+        // viewPort Y: 0
+        // viewPort Width: 2560
+        // viewPort Height: 1440
+        // MouseState X: 1280
+        // MouseState Y: 720
+        //
+        // Windowed
+        // viewPort X: 0 // viewport X and Y seem to always be 0 on wayland
+        // viewPort Y: 0
+        // viewPort Width: 800 // viewport seems to be the size of the window
+        // viewPort Height: 480
+        // MouseState X: 1900 // mouse state seems to be relative to the monitor
+        // MouseState Y: 861
+        // Delta X: -1500
+        // Delta Y: -621
+        // Setting mouse to X400
+        // Setting mouse to Y240
+
+        // To solve this we would need access to the monitors resolution.
+        // and the location of the game window which doesnt seem to be available
+        // on wayland.  So instead we track the last known mouse position.
+        // and use that as the delta.
+        if (mouseMonitorPosition.X != lastMousePosition.X || mouseMonitorPosition.Y != lastMousePosition.Y)
         {
-            int mouseCenterDeltaY = (GraphicsDeviceManager.DefaultBackBufferHeight / 2) - Mouse.GetState().Y;
-            int mouseCenterDeltaX = (GraphicsDeviceManager.DefaultBackBufferWidth / 2) - Mouse.GetState().X;
+            int mouseCenterDeltaY = lastMousePosition.Y - mouseMonitorPosition.Y;
+            int mouseCenterDeltaX = lastMousePosition.X - mouseMonitorPosition.X;
+
+            System.Console.WriteLine("Delta X: " + mouseCenterDeltaX);
+            System.Console.WriteLine("Delta Y: " + mouseCenterDeltaY);
 
             // Ignore huge deltas (likely from window focus)
             if (Math.Abs(mouseCenterDeltaX) > 100 || Math.Abs(mouseCenterDeltaY) > 100)
             {
-                Mouse.SetPosition((int)GraphicsDeviceManager.DefaultBackBufferWidth / 2, (int)GraphicsDeviceManager.DefaultBackBufferHeight / 2);
+                SetMouseToCenter();
             }
             else
             {
@@ -137,7 +176,7 @@ public class PlayGroundScene : Scene
                 float maxPitch = MathHelper.ToRadians(89);
                 pitch = MathHelper.Clamp(pitch, -maxPitch, maxPitch);
 
-                Mouse.SetPosition((int)GraphicsDeviceManager.DefaultBackBufferWidth / 2, (int)GraphicsDeviceManager.DefaultBackBufferHeight / 2);
+                SetMouseToCenter();
             }
         }
 
@@ -147,8 +186,6 @@ public class PlayGroundScene : Scene
 
     public override void Draw(GameTime gameTime)
     {
-        System.Console.WriteLine("Inside Draw");
-        // Core.GraphicsDevice.RasterizerState = RasterizerState.CullNone;
         DrawModel(pillarOneOriginMiddle, pillarOneWorldMatrix);
         DrawModel(floor, floorMatrix);
         DrawModel(walltorch, wallTorchMatrix);

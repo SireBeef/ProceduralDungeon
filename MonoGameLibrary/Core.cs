@@ -60,6 +60,11 @@ public class Core : Game
     public static InputManager Input { get; private set; }
 
     /// <summary>
+    /// Keeps track of the current Viewport center
+    /// </summary>
+    public static Point ViewportCenter { get; private set; }
+
+    /// <summary>
     /// Gets or Sets a value that indicates if the game should exit when the esc key on the keyboard is pressed.
     /// </summary>
     public static bool ExitOnEscape { get; set; }
@@ -148,11 +153,22 @@ public class Core : Game
 
         // Create a new audio controller.
         Audio = new AudioController();
+
+        Viewport viewPort = Graphics.GraphicsDevice.Viewport;
+        ViewportCenter = new Point(
+                viewPort.Width / 2,
+                viewPort.Height / 2
+        );
     }
 
     private void OnClientSizeChanged(object sender, EventArgs e)
     {
         Resolution.CalculateDestinationRectangle();
+        Viewport viewPort = Graphics.GraphicsDevice.Viewport;
+        ViewportCenter = new Point(
+                viewPort.Width / 2,
+                viewPort.Height / 2
+        );
     }
 
     protected override void UnloadContent()
