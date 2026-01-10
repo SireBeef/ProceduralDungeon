@@ -39,10 +39,10 @@ public class Core : Game
     /// </summary>
     public static new GraphicsDevice GraphicsDevice { get; private set; }
 
-    /// <summary>
-    /// Gets the sprite batch used for all 2D rendering.
-    /// </summary>
-    public static SpriteBatch SpriteBatch { get; private set; }
+    // /// <summary>
+    // /// Gets the sprite batch used for all 2D rendering.
+    // /// </summary>
+    // public static SpriteBatch SpriteBatch { get; private set; }
 
     /// <summary>
     /// Gets the resolution manager for virtual resolution rendering.
@@ -134,8 +134,8 @@ public class Core : Game
         // graphics device.
         GraphicsDevice = base.GraphicsDevice;
 
-        // Create the sprite batch instance.
-        SpriteBatch = new SpriteBatch(GraphicsDevice);
+        // // Create the sprite batch instance.
+        // SpriteBatch = new SpriteBatch(GraphicsDevice);
 
         // Initialize the resolution manager with the virtual resolution
         Resolution = new Graphics.Resolution(GraphicsDevice, _virtualWidth, _virtualHeight);
@@ -204,7 +204,7 @@ public class Core : Game
         }
 
         // End rendering and draw the scaled result to the screen
-        Resolution.EndDraw(SpriteBatch);
+        Resolution.EndDraw();
 
         base.Draw(gameTime);
     }

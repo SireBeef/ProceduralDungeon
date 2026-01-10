@@ -69,7 +69,7 @@ public class Resolution
     /// </summary>
     public void BeginDraw()
     {
-        _graphicsDevice.SetRenderTarget(_renderTarget);
+        // _graphicsDevice.SetRenderTarget(_renderTarget);
         _graphicsDevice.Clear(Color.Black);
     }
 
@@ -77,15 +77,15 @@ public class Resolution
     /// Ends rendering to the virtual resolution and draws the scaled result to the screen.
     /// </summary>
     /// <param name="spriteBatch">The sprite batch to use for drawing.</param>
-    public void EndDraw(SpriteBatch spriteBatch)
+    public void EndDraw()
     {
         // Reset render target to back buffer
-        _graphicsDevice.SetRenderTarget(null);
-        _graphicsDevice.Clear(Color.Black);
+        // _graphicsDevice.SetRenderTarget(null);
+        // _graphicsDevice.Clear(Color.Red);
 
         // Draw the render target scaled to fit the screen
-        spriteBatch.Begin(samplerState: SamplerState.PointClamp);
-        spriteBatch.Draw(_renderTarget, _destinationRectangle, Color.White);
-        spriteBatch.End();
+        // spriteBatch.Begin(samplerState: SamplerState.PointClamp);
+        // spriteBatch.Draw(_renderTarget, _destinationRectangle, Color.White);
+        // spriteBatch.End();
     }
 }
