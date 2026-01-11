@@ -4,7 +4,6 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGameLibrary.Audio;
-using MonoGameLibrary.Graphics;
 using MonoGameLibrary.Input;
 using MonoGameLibrary.Scenes;
 
@@ -13,10 +12,6 @@ namespace MonoGameLibrary;
 public class Core : Game
 {
     internal static Core s_instance;
-
-    // Stores the virtual resolution dimensions passed to the constructor
-    private int _virtualWidth;
-    private int _virtualHeight;
 
     /// <summary>
     /// Gets a reference to the Core instance.
@@ -45,11 +40,6 @@ public class Core : Game
     public static SpriteBatch SpriteBatch { get; private set; }
 
     /// <summary>
-    /// Gets the resolution manager for virtual resolution rendering.
-    /// </summary>
-    public static Graphics.Resolution Resolution { get; private set; }
-
-    /// <summary>
     /// Gets the content manager used to load global assets.
     /// </summary>
     public static new ContentManager Content { get; private set; }
@@ -74,12 +64,6 @@ public class Core : Game
     /// </summary>
     public static AudioController Audio { get; private set; }
 
-    // FPS counter fields
-    private static SpriteFont s_fpsFont;
-    private static int s_frameCount;
-    private static double s_elapsedTime;
-    private static int s_fps;
-
     /// <summary>
     /// Creates a new Core instance.
     /// </summary>
@@ -97,10 +81,6 @@ public class Core : Game
 
         // Store reference to engine for global member access.
         s_instance = this;
-
-        // Store virtual resolution for later use
-        _virtualWidth = width;
-        _virtualHeight = height;
 
         // Create a new graphics device manager.
         Graphics = new GraphicsDeviceManager(this);
@@ -148,9 +128,6 @@ public class Core : Game
         // Create the sprite batch instance.
         SpriteBatch = new SpriteBatch(GraphicsDevice);
 
-        // Initialize the resolution manager with the virtual resolution
-        Resolution = new Graphics.Resolution(GraphicsDevice, _virtualWidth, _virtualHeight);
-
         // Subscribe to window size changes
         Window.ClientSizeChanged += OnClientSizeChanged;
 
@@ -159,9 +136,6 @@ public class Core : Game
 
         // Create a new audio controller.
         Audio = new AudioController();
-
-        // Load the FPS font
-        s_fpsFont = Content.Load<SpriteFont>("fonts/fps_font");
 
         Viewport viewPort = Graphics.GraphicsDevice.Viewport;
         ViewportCenter = new Point(
@@ -172,7 +146,6 @@ public class Core : Game
 
     private void OnClientSizeChanged(object sender, EventArgs e)
     {
-        Resolution.CalculateDestinationRectangle();
         Viewport viewPort = Graphics.GraphicsDevice.Viewport;
         ViewportCenter = new Point(
                 viewPort.Width / 2,
@@ -190,15 +163,6 @@ public class Core : Game
 
     protected override void Update(GameTime gameTime)
     {
-        // Update FPS counter
-        s_elapsedTime += gameTime.ElapsedGameTime.TotalSeconds;
-        if (s_elapsedTime >= 1.0)
-        {
-            s_fps = s_frameCount;
-            s_frameCount = 0;
-            s_elapsedTime = 0;
-        }
-
         // Update the input manager.
         Input.Update(gameTime);
 
@@ -228,26 +192,16 @@ public class Core : Game
 
     protected override void Draw(GameTime gameTime)
     {
-        // Increment frame counter
-        s_frameCount++;
+        // Set graphics state for 3D rendering
+        GraphicsDevice.DepthStencilState = DepthStencilState.Default;
+        GraphicsDevice.BlendState = BlendState.Opaque;
+        GraphicsDevice.Clear(Color.DarkBlue);
 
-        // Begin rendering to the virtual resolution render target
-        Resolution.BeginDraw();
-
-        // If there is an active scene, draw it to the render target
+        // If there is an active scene, draw it
         if (s_activeScene != null)
         {
             s_activeScene.Draw(gameTime);
         }
-
-        // End rendering and draw the scaled result to the screen
-        Resolution.EndDraw();
-
-        // Draw FPS counter on top of everything at native resolution
-        SpriteBatch.Begin();
-        SpriteBatch.DrawString(s_fpsFont, $"FPS: {s_fps}", new Vector2(10, 10), Color.Yellow);
-        SpriteBatch.End();
-
 
         base.Draw(gameTime);
     }

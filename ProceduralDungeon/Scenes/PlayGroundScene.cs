@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGameLibrary;
 using MonoGameLibrary.Scenes;
+using MonoGameLibrary.UI;
 
 namespace ProceduralDungeon.Scenes;
 
@@ -12,6 +13,8 @@ public class PlayGroundScene : Scene
 
     private static float MOVEMENT_SPEED = 0.1f;
     private static float MOUSE_SENSITIVITY = 0.25f;
+
+    private FpsCounter _fpsCounter;
 
     Vector3 camPosition;
     float yaw = 0f;   // Y-axis rotation (left/right)
@@ -47,7 +50,7 @@ public class PlayGroundScene : Scene
         base.Initialize();
 
         Core.ExitOnEscape = true;
-        Core.Instance.IsMouseVisible = true;
+        Core.Instance.IsMouseVisible = false;
 
         // Set up Camera
         camPosition = new Vector3(0f, .7f, 6f);
@@ -76,6 +79,9 @@ public class PlayGroundScene : Scene
         coloredBox = Core.Content.Load<Model>("models/colored_box");
         rockyBox = Core.Content.Load<Model>("models/rocky_box");
 
+        // Initialize FPS counter
+        SpriteFont fpsFont = Core.Content.Load<SpriteFont>("fonts/fps_font");
+        _fpsCounter = new FpsCounter(fpsFont, new Vector2(10, 10), Color.Yellow);
     }
 
     protected void BuildMap()
@@ -97,6 +103,8 @@ public class PlayGroundScene : Scene
 
     public override void Update(GameTime gameTime)
     {
+        // Update FPS counter
+        _fpsCounter.Update(gameTime);
 
         // Create rotation matrices
         Matrix yawRotation = Matrix.CreateRotationY(yaw);
@@ -181,11 +189,17 @@ public class PlayGroundScene : Scene
 
     public override void Draw(GameTime gameTime)
     {
+        // Draw 3D models
         DrawModel(pillarOneOriginMiddle, pillarOneWorldMatrix);
         DrawModel(floor, floorMatrix);
         DrawModel(walltorch, wallTorchMatrix);
         DrawModel(coloredBox, coloredBoxMatrix);
         DrawModel(rockyBox, rockyBoxMatrix);
+
+        // Draw 2D UI
+        Core.SpriteBatch.Begin();
+        _fpsCounter.Draw(Core.SpriteBatch, gameTime);
+        Core.SpriteBatch.End();
     }
 
     void DrawModel(Model model, Matrix world)
