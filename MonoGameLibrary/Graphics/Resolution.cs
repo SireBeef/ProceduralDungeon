@@ -69,8 +69,13 @@ public class Resolution
     /// </summary>
     public void BeginDraw()
     {
+
+        // Reset graphics device state for this frame's 3D rendering                                                                                               
+        // SpriteBatch.Begin() sets DepthStencilState to None, which disables depth testing                                                                        
+        Core.GraphicsDevice.DepthStencilState = DepthStencilState.Default;
+        Core.GraphicsDevice.BlendState = BlendState.Opaque;
         // _graphicsDevice.SetRenderTarget(_renderTarget);
-        _graphicsDevice.Clear(Color.WhiteSmoke);
+        _graphicsDevice.Clear(Color.DarkBlue);
     }
 
     /// <summary>

@@ -146,3 +146,10 @@
 /processorParam:TextureFormat=Compressed
 /build:models/wall_torch.fbx
 
+#begin fonts/fps_font.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:fonts/fps_font.spritefont
+

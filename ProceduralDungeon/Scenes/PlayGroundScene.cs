@@ -76,7 +76,6 @@ public class PlayGroundScene : Scene
         coloredBox = Core.Content.Load<Model>("models/colored_box");
         rockyBox = Core.Content.Load<Model>("models/rocky_box");
 
-        System.Console.WriteLine("Content loaded");
     }
 
     protected void BuildMap()
@@ -87,8 +86,6 @@ public class PlayGroundScene : Scene
         wallTorchMatrix = Matrix.CreateWorld(new Vector3(0, 0, 1f), Vector3.Forward, Vector3.Up);
         coloredBoxMatrix = Matrix.CreateWorld(new Vector3(1.25f, 0, 1f), Vector3.Forward, Vector3.Up);
         rockyBoxMatrix = Matrix.CreateWorld(new Vector3(2.25f, 0, 1f), Vector3.Forward, Vector3.Up);
-
-        System.Console.WriteLine("Content loaded");
     }
 
 
@@ -158,8 +155,6 @@ public class PlayGroundScene : Scene
             int mouseCenterDeltaY = lastMousePosition.Y - mouseMonitorPosition.Y;
             int mouseCenterDeltaX = lastMousePosition.X - mouseMonitorPosition.X;
 
-            System.Console.WriteLine("Delta X: " + mouseCenterDeltaX);
-            System.Console.WriteLine("Delta Y: " + mouseCenterDeltaY);
 
             // Ignore huge deltas (likely from window focus)
             if (Math.Abs(mouseCenterDeltaX) > 100 || Math.Abs(mouseCenterDeltaY) > 100)

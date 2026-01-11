@@ -39,10 +39,10 @@ public class Core : Game
     /// </summary>
     public static new GraphicsDevice GraphicsDevice { get; private set; }
 
-    // /// <summary>
-    // /// Gets the sprite batch used for all 2D rendering.
-    // /// </summary>
-    // public static SpriteBatch SpriteBatch { get; private set; }
+    /// <summary>
+    /// Gets the sprite batch used for all 2D rendering.
+    /// </summary>
+    public static SpriteBatch SpriteBatch { get; private set; }
 
     /// <summary>
     /// Gets the resolution manager for virtual resolution rendering.
@@ -73,6 +73,12 @@ public class Core : Game
     /// Gets a reference to the audio control system.
     /// </summary>
     public static AudioController Audio { get; private set; }
+
+    // FPS counter fields
+    private static SpriteFont s_fpsFont;
+    private static int s_frameCount;
+    private static double s_elapsedTime;
+    private static int s_fps;
 
     /// <summary>
     /// Creates a new Core instance.
@@ -113,7 +119,7 @@ public class Core : Game
         }
         Graphics.IsFullScreen = fullScreen;
         Graphics.ApplyChanges();
-
+        IsFixedTimeStep = false;
         // Set the window title
         Window.Title = title;
 
@@ -139,8 +145,8 @@ public class Core : Game
         // graphics device.
         GraphicsDevice = base.GraphicsDevice;
 
-        // // Create the sprite batch instance.
-        // SpriteBatch = new SpriteBatch(GraphicsDevice);
+        // Create the sprite batch instance.
+        SpriteBatch = new SpriteBatch(GraphicsDevice);
 
         // Initialize the resolution manager with the virtual resolution
         Resolution = new Graphics.Resolution(GraphicsDevice, _virtualWidth, _virtualHeight);
@@ -153,6 +159,9 @@ public class Core : Game
 
         // Create a new audio controller.
         Audio = new AudioController();
+
+        // Load the FPS font
+        s_fpsFont = Content.Load<SpriteFont>("fonts/fps_font");
 
         Viewport viewPort = Graphics.GraphicsDevice.Viewport;
         ViewportCenter = new Point(
@@ -181,6 +190,15 @@ public class Core : Game
 
     protected override void Update(GameTime gameTime)
     {
+        // Update FPS counter
+        s_elapsedTime += gameTime.ElapsedGameTime.TotalSeconds;
+        if (s_elapsedTime >= 1.0)
+        {
+            s_fps = s_frameCount;
+            s_frameCount = 0;
+            s_elapsedTime = 0;
+        }
+
         // Update the input manager.
         Input.Update(gameTime);
 
@@ -210,6 +228,9 @@ public class Core : Game
 
     protected override void Draw(GameTime gameTime)
     {
+        // Increment frame counter
+        s_frameCount++;
+
         // Begin rendering to the virtual resolution render target
         Resolution.BeginDraw();
 
@@ -221,6 +242,12 @@ public class Core : Game
 
         // End rendering and draw the scaled result to the screen
         Resolution.EndDraw();
+
+        // Draw FPS counter on top of everything at native resolution
+        SpriteBatch.Begin();
+        SpriteBatch.DrawString(s_fpsFont, $"FPS: {s_fps}", new Vector2(10, 10), Color.Yellow);
+        SpriteBatch.End();
+
 
         base.Draw(gameTime);
     }
