@@ -22,22 +22,24 @@ public class PlayGroundScene : Scene
 
     Point lastMousePosition;
 
-    Vector3 pillarOnePositionOriginBottom;
-
     // Responsible for taking 3d and turning it into 2D
     Matrix projectionMatrix;
     // Camera's physical position location & orientation
     Matrix viewMatrix;
 
     // Projects object into the world
-    Matrix pillarOneWorldMatrix;
+    Matrix pillarSoloWorldMatrix;
+    Matrix pillarWallOneWorldMatrix;
+    Matrix wallOneWorldMatrix;
     Matrix floorMatrix;
     Matrix wallTorchMatrix;
     Matrix coloredBoxMatrix;
     Matrix rockyBoxMatrix;
 
-    Model pillarOneOriginMiddle;
     Model floor;
+    Model pillarSolo;
+    Model pillarWallOne;
+    Model wallOne;
     Model walltorch;
     Model coloredBox;
     Model rockyBox;
@@ -73,7 +75,10 @@ public class PlayGroundScene : Scene
 
     public override void LoadContent()
     {
-        pillarOneOriginMiddle = Core.Content.Load<Model>("models/pillar");
+
+        pillarSolo = Core.Content.Load<Model>("models/pillar_solo");
+        pillarWallOne = Core.Content.Load<Model>("models/pillar_wall_01");
+        wallOne = Core.Content.Load<Model>("models/wall_01");
         floor = Core.Content.Load<Model>("models/floor");
         walltorch = Core.Content.Load<Model>("models/wall_torch");
         coloredBox = Core.Content.Load<Model>("models/colored_box");
@@ -86,8 +91,11 @@ public class PlayGroundScene : Scene
 
     protected void BuildMap()
     {
-        Vector3 pillarOnePosition = new Vector3(0, 0, 5);
-        pillarOneWorldMatrix = Matrix.CreateWorld(pillarOnePosition, Vector3.Forward, Vector3.Up);
+        Vector3 pillarSoloPosition = new Vector3(-10, 0, 5);
+        Vector3 pillarWallOnePosition = new Vector3(0, 0, 5);
+        pillarSoloWorldMatrix = Matrix.CreateWorld(pillarSoloPosition, Vector3.Forward, Vector3.Up);
+        pillarWallOneWorldMatrix = Matrix.CreateWorld(pillarWallOnePosition, Vector3.Forward, Vector3.Up);
+        wallOneWorldMatrix = Matrix.CreateWorld(pillarWallOnePosition + new Vector3(1, 0, 0), Vector3.Forward, Vector3.Up);
         floorMatrix = Matrix.CreateWorld(Vector3.Zero, Vector3.Forward, Vector3.Up);
         wallTorchMatrix = Matrix.CreateWorld(new Vector3(0, 0, 1f), Vector3.Forward, Vector3.Up);
         coloredBoxMatrix = Matrix.CreateWorld(new Vector3(1.25f, 0, 1f), Vector3.Forward, Vector3.Up);
@@ -190,7 +198,9 @@ public class PlayGroundScene : Scene
     public override void Draw(GameTime gameTime)
     {
         // Draw 3D models
-        DrawModel(pillarOneOriginMiddle, pillarOneWorldMatrix);
+        DrawModel(pillarSolo, pillarSoloWorldMatrix);
+        DrawModel(pillarWallOne, pillarWallOneWorldMatrix);
+        DrawModel(wallOne, wallOneWorldMatrix);
         DrawModel(floor, floorMatrix);
         DrawModel(walltorch, wallTorchMatrix);
         DrawModel(coloredBox, coloredBoxMatrix);
