@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -8,8 +9,10 @@ using MonoGameLibrary.UI;
 
 namespace ProceduralDungeon.Scenes;
 
-public class PlayGroundScene : Scene
+public class DungeonAssetViewScene : Scene
 {
+
+    private static int PLACEMENT_WIDTH_IN_METERS = 3;
 
     private static float MOVEMENT_SPEED = 0.1f;
     private static float MOUSE_SENSITIVITY = 0.25f;
@@ -28,18 +31,7 @@ public class PlayGroundScene : Scene
     Matrix viewMatrix;
 
     // Projects object into the world
-    Matrix pillarSoloWorldMatrix;
-    Matrix floorMatrix;
-    Matrix wallTorchMatrix;
-    Matrix coloredBoxMatrix;
-    Matrix rockyBoxMatrix;
-
-    Model floor;
-    Model pillarSolo;
-    Model walltorch;
-    Model coloredBox;
-    Model rockyBox;
-
+    (Model model, Matrix world)[] models;
 
 
     public override void Initialize()
@@ -71,12 +63,19 @@ public class PlayGroundScene : Scene
 
     public override void LoadContent()
     {
+        // Dynamically load all models from the modular directory
+        string contentPath = Path.Combine(Core.Content.RootDirectory, "models", "modular");
+        string[] modelFiles = Directory.GetFiles(contentPath, "*.fbx");
 
-        pillarSolo = Core.Content.Load<Model>("models/pillar_solo");
-        floor = Core.Content.Load<Model>("models/floor");
-        walltorch = Core.Content.Load<Model>("models/wall_torch");
-        coloredBox = Core.Content.Load<Model>("models/colored_box");
-        rockyBox = Core.Content.Load<Model>("models/rocky_box");
+        models = new (Model, Matrix)[modelFiles.Length];
+        for (int i = 0; i < modelFiles.Length; i++)
+        {
+            string modelName = Path.GetFileNameWithoutExtension(modelFiles[i]);
+            Model model = Core.Content.Load<Model>($"models/modular/{modelName}");
+            Vector3 position = new Vector3(i * PLACEMENT_WIDTH_IN_METERS, 0, 0);
+            Matrix world = Matrix.CreateWorld(position, Vector3.Forward, Vector3.Up);
+            models[i] = (model, world);
+        }
 
         // Initialize FPS counter
         SpriteFont fpsFont = Core.Content.Load<SpriteFont>("fonts/fps_font");
@@ -85,13 +84,6 @@ public class PlayGroundScene : Scene
 
     protected void BuildMap()
     {
-        Vector3 pillarSoloPosition = new Vector3(-10, 0, 5);
-        Vector3 pillarWallOnePosition = new Vector3(0, 0, 5);
-        pillarSoloWorldMatrix = Matrix.CreateWorld(pillarSoloPosition, Vector3.Forward, Vector3.Up);
-        floorMatrix = Matrix.CreateWorld(Vector3.Zero, Vector3.Forward, Vector3.Up);
-        wallTorchMatrix = Matrix.CreateWorld(new Vector3(0, 0, 1f), Vector3.Forward, Vector3.Up);
-        coloredBoxMatrix = Matrix.CreateWorld(new Vector3(1.25f, 0, 1f), Vector3.Forward, Vector3.Up);
-        rockyBoxMatrix = Matrix.CreateWorld(new Vector3(2.25f, 0, 1f), Vector3.Forward, Vector3.Up);
     }
 
 
@@ -190,11 +182,10 @@ public class PlayGroundScene : Scene
     public override void Draw(GameTime gameTime)
     {
         // Draw 3D models
-        DrawModel(pillarSolo, pillarSoloWorldMatrix);
-        DrawModel(floor, floorMatrix);
-        DrawModel(walltorch, wallTorchMatrix);
-        DrawModel(coloredBox, coloredBoxMatrix);
-        DrawModel(rockyBox, rockyBoxMatrix);
+        foreach (var (model, world) in models)
+        {
+            DrawModel(model, world);
+        }
 
         // Draw 2D UI
         Core.SpriteBatch.Begin();

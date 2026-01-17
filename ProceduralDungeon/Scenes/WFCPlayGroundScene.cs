@@ -8,7 +8,7 @@ using MonoGameLibrary.UI;
 
 namespace ProceduralDungeon.Scenes;
 
-public class PlayGroundScene : Scene
+public class WFCPlayGroundScene : Scene
 {
 
     private static float MOVEMENT_SPEED = 0.1f;
