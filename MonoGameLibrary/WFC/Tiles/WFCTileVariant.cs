@@ -2,7 +2,7 @@ using Microsoft.Xna.Framework;
 using MonoGameLibrary.WFC.Edges;
 using System.Collections.Generic;
 
-namespace WFC.Tiles
+namespace MonoGameLibrary.WFC.Tiles
 {
     public sealed class WFCTileVariant
     {

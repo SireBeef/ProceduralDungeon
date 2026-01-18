@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using MonoGameLibrary.WFC.Edges;
 
-namespace WFC.Tiles
+namespace MonoGameLibrary.WFC.Tiles
 {
     public sealed class WFCTile
     {
@@ -52,7 +52,7 @@ namespace WFC.Tiles
             foreach (var kvp in baseEdges)
             {
                 var newDir = (Direction)(((int)kvp.Key + steps) % 4);
-                rotated[newDir] = kvp.Value;
+                rotated[newDir] = kvp.Value.Rotate(rotationDegrees);
             }
 
             return rotated;
