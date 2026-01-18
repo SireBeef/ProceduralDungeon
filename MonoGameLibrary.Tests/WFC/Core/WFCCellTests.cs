@@ -164,30 +164,36 @@ public class WFCCellTests
     }
 
     [Fact]
-    public void WFCCellRemoveIncompatibleVariants_WhenNeighborEdgeIncompatible_RemovesVariants()
+    public void WFCCellRemoveIncompatibleVariants_WhenSourceDoesNotAccept_RemovesVariants()
     {
         var floorVariant = CreateFloorVariant();
         var wallVariant = CreateWallVariant();
         var cell = new WFCCell(0, 0, new[] { floorVariant, wallVariant });
 
-        // Neighbor to the East has an edge that only accepts "floor"
-        var neighborEdge = new WFCEdge(new[] { "floor" });
-        var removedCount = cell.RemoveIncompatibleVariants(Direction.East, neighborEdge);
+        // Source cell to the East only accepts "floor" tiles on its west edge
+        var sourceVariant = CreateSourceThatOnlyAcceptsFloor();
+        var sourceVariants = new[] { sourceVariant };
 
-        // Wall variant's West edge has "wall_rot0", not "floor", so it should be removed
+        // Direction.East means source is to our East
+        var removedCount = cell.RemoveIncompatibleVariants(Direction.East, sourceVariants);
+
+        // Wall variant is not accepted by source (source's west edge accepts "floor", not "wall")
         Assert.Equal(1, removedCount);
         Assert.Contains(floorVariant, cell.PossibleVariants);
         Assert.DoesNotContain(wallVariant, cell.PossibleVariants);
     }
 
     [Fact]
-    public void WFCCellRemoveIncompatibleVariants_WhenAllCompatible_RemovesNothing()
+    public void WFCCellRemoveIncompatibleVariants_WhenBidirectionallyCompatible_RemovesNothing()
     {
         var floorVariant = CreateFloorVariant();
         var cell = new WFCCell(0, 0, new[] { floorVariant });
 
-        var neighborEdge = new WFCEdge(new[] { "floor" });
-        var removedCount = cell.RemoveIncompatibleVariants(Direction.East, neighborEdge);
+        // Source accepts floor and floor accepts source
+        var sourceVariant = CreateSourceThatOnlyAcceptsFloor();
+        var sourceVariants = new[] { sourceVariant };
+
+        var removedCount = cell.RemoveIncompatibleVariants(Direction.East, sourceVariants);
 
         Assert.Equal(0, removedCount);
         Assert.Single(cell.PossibleVariants);
@@ -229,6 +235,27 @@ public class WFCCellTests
             { Direction.West, new WFCEdge(new[] { "wall_rot0" }) }
         };
         var tile = new WFCTile("wall", edges, new[] { 0 }, "Models/wall");
+        return tile.CreateVariants().First();
+    }
+
+    /// <summary>
+    /// Creates a source variant that only accepts "floor" tiles on all edges.
+    /// This is a floor tile, so its ID is "floor_rot0".
+    /// - Source's west edge accepts "floor" (matches floor_rot0's base ID)
+    /// - Floor's east edge accepts "floor" (matches source's base ID)
+    /// Therefore floor is bidirectionally compatible with this source.
+    /// Wall is NOT compatible because wall's ID is "wall_rot0" which doesn't match "floor".
+    /// </summary>
+    private static WFCTileVariant CreateSourceThatOnlyAcceptsFloor()
+    {
+        var edges = new Dictionary<Direction, WFCEdge>
+        {
+            { Direction.North, new WFCEdge(new[] { "floor" }) },
+            { Direction.East, new WFCEdge(new[] { "floor" }) },
+            { Direction.South, new WFCEdge(new[] { "floor" }) },
+            { Direction.West, new WFCEdge(new[] { "floor" }) }
+        };
+        var tile = new WFCTile("floor", edges, new[] { 0 }, "Models/floor");
         return tile.CreateVariants().First();
     }
 }

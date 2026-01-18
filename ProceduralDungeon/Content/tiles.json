@@ -1,7 +1,7 @@
 {
   "tiles": [
     {
-      "id": "floor_tile",
+      "id": "floor",
       "model": "models/modular/floor_tile",
       "rotations": [0],
       "edges": {

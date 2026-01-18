@@ -119,26 +119,28 @@ public class WFCAlgorithmTests
     }
 
     [Fact]
-    public void WFCAlgorithmStatus_WhenContradictionOccurs_IsContradiction()
+    public void WFCAlgorithmStatus_WhenTilesAreSelfCompatible_Completes()
     {
-        // Create tiles that cannot possibly connect
+        // Create two tile types that are each self-compatible but mutually exclusive
         var tileSet = new WFCTileSet();
 
+        // tile1 only accepts other tile1 tiles (by ID)
         var tile1Edges = new Dictionary<Direction, WFCEdge>
         {
-            { Direction.North, new WFCEdge(new[] { "a" }) },
-            { Direction.East, new WFCEdge(new[] { "a" }) },
-            { Direction.South, new WFCEdge(new[] { "a" }) },
-            { Direction.West, new WFCEdge(new[] { "a" }) }
+            { Direction.North, new WFCEdge(new[] { "tile1" }) },
+            { Direction.East, new WFCEdge(new[] { "tile1" }) },
+            { Direction.South, new WFCEdge(new[] { "tile1" }) },
+            { Direction.West, new WFCEdge(new[] { "tile1" }) }
         };
         tileSet.AddTile(new WFCTile("tile1", tile1Edges, new[] { 0 }, "Models/tile1"));
 
+        // tile2 only accepts other tile2 tiles (by ID)
         var tile2Edges = new Dictionary<Direction, WFCEdge>
         {
-            { Direction.North, new WFCEdge(new[] { "b" }) },
-            { Direction.East, new WFCEdge(new[] { "b" }) },
-            { Direction.South, new WFCEdge(new[] { "b" }) },
-            { Direction.West, new WFCEdge(new[] { "b" }) }
+            { Direction.North, new WFCEdge(new[] { "tile2" }) },
+            { Direction.East, new WFCEdge(new[] { "tile2" }) },
+            { Direction.South, new WFCEdge(new[] { "tile2" }) },
+            { Direction.West, new WFCEdge(new[] { "tile2" }) }
         };
         tileSet.AddTile(new WFCTile("tile2", tile2Edges, new[] { 0 }, "Models/tile2"));
 
@@ -147,7 +149,7 @@ public class WFCAlgorithmTests
 
         var status = algorithm.Run();
 
-        // Should complete (not contradict) because propagation will force all cells to same tile type
+        // Should complete because propagation will force all cells to same tile type
         // Both tiles are self-compatible, so once one is chosen, all neighbors get the same
         Assert.Equal(WFCStatus.Completed, status);
     }

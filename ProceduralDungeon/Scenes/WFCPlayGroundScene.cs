@@ -37,6 +37,8 @@ public class WFCPlayGroundScene : Scene
     WFCGrid wfcGrid;
     WFCAlgorithm wfcAlgorithm;
 
+    (Model model, Matrix world)[] models;
+
     public override void Initialize()
     {
         // LoadContent is called during base.Initialize().
@@ -70,6 +72,24 @@ public class WFCPlayGroundScene : Scene
         Console.WriteLine(wfcAlgorithm.Status);
         wfcAlgorithm.Run();
         Console.WriteLine(wfcAlgorithm.Status);
+
+        // Build the models array from the collapsed grid
+        models = new (Model, Matrix)[WFC_GRID_WIDTH * WFC_GRID_HEIGHT];
+        for (int y = 0; y < WFC_GRID_HEIGHT; y++)
+        {
+            for (int x = 0; x < WFC_GRID_WIDTH; x++)
+            {
+                WFCCell cell = wfcGrid.GetCell(x, y);
+                WFCTileVariant variant = cell.CollapsedVariant;
+
+                Model model = Core.Content.Load<Model>(variant.ModelAssetName);
+                Vector3 position = new Vector3(x * TILE_SIZE, 0, y * TILE_SIZE);
+                Matrix rotation = Matrix.CreateRotationY(MathHelper.ToRadians(variant.RotationDegrees));
+                Matrix world = rotation * Matrix.CreateTranslation(position);
+
+                models[y * WFC_GRID_WIDTH + x] = (model, world);
+            }
+        }
 
         // Initialize FPS counter
         SpriteFont fpsFont = Core.Content.Load<SpriteFont>("fonts/fps_font");
@@ -171,24 +191,9 @@ public class WFCPlayGroundScene : Scene
     public override void Draw(GameTime gameTime)
     {
         // Draw 3D models
-        // Notes for the morning because im tired.
-        // I believe we need to grab the parent of the varient
-        // get its ModelAssetName make sure it's loaded in. (this should be done in the load function not here).
-        // if there is a rotation applied to the varient, we need to make sure we apply that rotation
-        // to the matrix for that particular cell. I **Think** thats the Vector3.Forward
-        // will need to figure out how to add a 90 or 180 or 270 degree rotation to that vector.
-        for (int y = 0; y < WFC_GRID_HEIGHT; y++)
+        foreach (var (model, world) in models)
         {
-            for (int x = 0; x < WFC_GRID_WIDTH; x++)
-            {
-                WFCCell currentCell = wfcGrid.GetCell(x, y);
-                WFCTileVariant varient = currentCell.CollapsedVariant;
-                Vector3 rotationVector = Vector3.Transform(
-    Vector3.Forward,
-    Matrix.CreateRotationY(MathHelper.ToRadians(varient.RotationDegrees))
-);
-                Matrix matrix = Matrix.CreateWorld(new Vector3(x * TILE_SIZE, 0, y * TILE_SIZE), Vector3.Forward * MathHelper.ToRadians(varient.RotationDegrees), Vector3.Up);
-            }
+            DrawModel(model, world);
         }
 
         // Draw 2D UI

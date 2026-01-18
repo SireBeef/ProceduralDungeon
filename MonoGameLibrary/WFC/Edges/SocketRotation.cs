@@ -27,4 +27,14 @@ public static class SocketRotation
 
         return $"{baseName}_rot{newRotation}";
     }
+
+    /// <summary>
+    /// Extracts the base name from a socket/variant ID.
+    /// "wall_rot90" returns "wall", "floor" returns "floor".
+    /// </summary>
+    public static string GetBaseName(string id)
+    {
+        var match = RotationPattern.Match(id);
+        return match.Success ? match.Groups[1].Value : id;
+    }
 }

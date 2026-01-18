@@ -94,8 +94,7 @@ public class WFCAlgorithm
                 if (neighbor.IsCollapsed)
                     continue;
 
-                var cellEdge = GetCombinedEdge(cell, direction);
-                int removed = neighbor.RemoveIncompatibleVariants(direction, cellEdge);
+                int removed = neighbor.RemoveIncompatibleVariants(direction, cell.PossibleVariants);
 
                 if (removed > 0 && !neighbor.IsContradiction)
                 {
@@ -103,20 +102,5 @@ public class WFCAlgorithm
                 }
             }
         }
-    }
-
-    private WFCEdge GetCombinedEdge(WFCCell cell, Direction direction)
-    {
-        var allSockets = new HashSet<string>();
-
-        foreach (var variant in cell.PossibleVariants)
-        {
-            foreach (var socket in variant.Edges[direction].Allowed)
-            {
-                allSockets.Add(socket);
-            }
-        }
-
-        return new WFCEdge(allSockets);
     }
 }

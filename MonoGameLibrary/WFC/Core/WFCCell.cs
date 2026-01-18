@@ -33,11 +33,20 @@ public class WFCCell
         return _possibleVariants.Remove(variant);
     }
 
-    public int RemoveIncompatibleVariants(Direction direction, WFCEdge neighborEdge)
+    /// <summary>
+    /// Removes variants that are incompatible with the source cell's variants.
+    /// A variant is compatible if there exists at least one source variant where:
+    /// - The source's edge (facing this cell) accepts this variant's ID
+    /// - This variant's edge (facing source) accepts the source variant's ID
+    /// </summary>
+    /// <param name="fromDirection">Direction FROM source TO this cell</param>
+    /// <param name="sourceVariants">The possible variants in the source cell</param>
+    public int RemoveIncompatibleVariants(Direction fromDirection, IReadOnlyCollection<WFCTileVariant> sourceVariants)
     {
-        var oppositeDirection = direction.Opposite();
+        Direction toSource = fromDirection.Opposite();
+
         var toRemove = _possibleVariants
-            .Where(v => !v.Edges[oppositeDirection].IsCompatible(neighborEdge))
+            .Where(myVariant => !IsCompatibleWithAny(myVariant, toSource, fromDirection, sourceVariants))
             .ToList();
 
         foreach (var variant in toRemove)
@@ -46,6 +55,27 @@ public class WFCCell
         }
 
         return toRemove.Count;
+    }
+
+    private bool IsCompatibleWithAny(
+        WFCTileVariant myVariant,
+        Direction toSource,
+        Direction fromSource,
+        IReadOnlyCollection<WFCTileVariant> sourceVariants)
+    {
+        foreach (var sourceVariant in sourceVariants)
+        {
+            // Source's edge facing me must accept my ID
+            bool sourceAcceptsMe = sourceVariant.Edges[fromSource].Accepts(myVariant.Id);
+
+            // My edge facing source must accept source's ID
+            bool iAcceptSource = myVariant.Edges[toSource].Accepts(sourceVariant.Id);
+
+            if (sourceAcceptsMe && iAcceptSource)
+                return true;
+        }
+
+        return false;
     }
 
     public void Collapse(Random random)
