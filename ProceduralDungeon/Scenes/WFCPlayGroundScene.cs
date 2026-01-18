@@ -14,8 +14,8 @@ namespace ProceduralDungeon.Scenes;
 public class WFCPlayGroundScene : Scene
 {
 
-    private static int WFC_GRID_HEIGHT = 20;
-    private static int WFC_GRID_WIDTH = 20;
+    private static int WFC_GRID_HEIGHT = 50;
+    private static int WFC_GRID_WIDTH = 50;
     private static int TILE_SIZE = 2;
     private static float MOVEMENT_SPEED = 0.1f;
     private static float MOUSE_SENSITIVITY = 0.25f;
@@ -84,7 +84,7 @@ public class WFCPlayGroundScene : Scene
 
                 Model model = Core.Content.Load<Model>(variant.ModelAssetName);
                 Vector3 position = new Vector3(x * TILE_SIZE, 0, y * TILE_SIZE);
-                Matrix rotation = Matrix.CreateRotationY(MathHelper.ToRadians(variant.RotationDegrees));
+                Matrix rotation = Matrix.CreateRotationY(MathHelper.ToRadians(-variant.RotationDegrees));
                 Matrix world = rotation * Matrix.CreateTranslation(position);
 
                 models[y * WFC_GRID_WIDTH + x] = (model, world);
