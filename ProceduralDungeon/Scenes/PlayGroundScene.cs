@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGameLibrary;
+using MonoGameLibrary.Graphics3D;
 using MonoGameLibrary.Scenes;
 using MonoGameLibrary.UI;
 
@@ -15,6 +16,7 @@ public class PlayGroundScene : Scene
     private static float MOUSE_SENSITIVITY = 0.25f;
 
     private FpsCounter _fpsCounter;
+    private CardinalDirectionIndicator _cardinalIndicator;
 
     Vector3 camPosition;
     float yaw = 0f;   // Y-axis rotation (left/right)
@@ -81,6 +83,9 @@ public class PlayGroundScene : Scene
         // Initialize FPS counter
         SpriteFont fpsFont = Core.Content.Load<SpriteFont>("fonts/fps_font");
         _fpsCounter = new FpsCounter(fpsFont, new Vector2(10, 10), Color.Yellow);
+
+        // Initialize cardinal direction indicator
+        _cardinalIndicator = new CardinalDirectionIndicator(Core.GraphicsDevice);
     }
 
     protected void BuildMap()
@@ -195,6 +200,9 @@ public class PlayGroundScene : Scene
         DrawModel(walltorch, wallTorchMatrix);
         DrawModel(coloredBox, coloredBoxMatrix);
         DrawModel(rockyBox, rockyBoxMatrix);
+
+        // Draw cardinal direction indicator at origin
+        _cardinalIndicator.Draw(viewMatrix, projectionMatrix);
 
         // Draw 2D UI
         Core.SpriteBatch.Begin();

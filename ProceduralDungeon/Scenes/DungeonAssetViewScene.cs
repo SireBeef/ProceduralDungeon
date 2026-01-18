@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGameLibrary;
+using MonoGameLibrary.Graphics3D;
 using MonoGameLibrary.Scenes;
 using MonoGameLibrary.UI;
 
@@ -18,6 +19,7 @@ public class DungeonAssetViewScene : Scene
     private static float MOUSE_SENSITIVITY = 0.25f;
 
     private FpsCounter _fpsCounter;
+    private CardinalDirectionIndicator[] _cardinalIndicators;
 
     Vector3 camPosition;
     float yaw = 0f;   // Y-axis rotation (left/right)
@@ -80,6 +82,17 @@ public class DungeonAssetViewScene : Scene
         // Initialize FPS counter
         SpriteFont fpsFont = Core.Content.Load<SpriteFont>("fonts/fps_font");
         _fpsCounter = new FpsCounter(fpsFont, new Vector2(10, 10), Color.Yellow);
+
+        // Initialize cardinal direction indicators - one per model
+        _cardinalIndicators = new CardinalDirectionIndicator[models.Length];
+        for (int i = 0; i < models.Length; i++)
+        {
+            _cardinalIndicators[i] = new CardinalDirectionIndicator(Core.GraphicsDevice)
+            {
+                Position = new Vector3(i * PLACEMENT_WIDTH_IN_METERS, 0, 0),
+                LineLength = 1.5f
+            };
+        }
     }
 
     protected void BuildMap()
@@ -185,6 +198,12 @@ public class DungeonAssetViewScene : Scene
         foreach (var (model, world) in models)
         {
             DrawModel(model, world);
+        }
+
+        // Draw cardinal direction indicators
+        foreach (var indicator in _cardinalIndicators)
+        {
+            indicator.Draw(viewMatrix, projectionMatrix);
         }
 
         // Draw 2D UI

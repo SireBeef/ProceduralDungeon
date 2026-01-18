@@ -5,12 +5,18 @@ using Microsoft.Xna.Framework.Input;
 using MonoGameLibrary;
 using MonoGameLibrary.Scenes;
 using MonoGameLibrary.UI;
+using MonoGameLibrary.WFC.Config;
+using MonoGameLibrary.WFC.Core;
+using MonoGameLibrary.WFC.Tiles;
 
 namespace ProceduralDungeon.Scenes;
 
 public class WFCPlayGroundScene : Scene
 {
 
+    private static int WFC_GRID_HEIGHT = 20;
+    private static int WFC_GRID_WIDTH = 20;
+    private static int TILE_SIZE = 2;
     private static float MOVEMENT_SPEED = 0.1f;
     private static float MOUSE_SENSITIVITY = 0.25f;
 
@@ -27,20 +33,9 @@ public class WFCPlayGroundScene : Scene
     // Camera's physical position location & orientation
     Matrix viewMatrix;
 
-    // Projects object into the world
-    Matrix pillarSoloWorldMatrix;
-    Matrix floorMatrix;
-    Matrix wallTorchMatrix;
-    Matrix coloredBoxMatrix;
-    Matrix rockyBoxMatrix;
-
-    Model floor;
-    Model pillarSolo;
-    Model walltorch;
-    Model coloredBox;
-    Model rockyBox;
-
-
+    WFCTileSet tileSet;
+    WFCGrid wfcGrid;
+    WFCAlgorithm wfcAlgorithm;
 
     public override void Initialize()
     {
@@ -59,8 +54,6 @@ public class WFCPlayGroundScene : Scene
         viewMatrix = Matrix.CreateLookAt(camPosition, GetCamTarget(), Vector3.Up);
 
         SetMouseToCenter();
-        BuildMap();
-
     }
 
     private void SetMouseToCenter()
@@ -71,29 +64,17 @@ public class WFCPlayGroundScene : Scene
 
     public override void LoadContent()
     {
-
-        pillarSolo = Core.Content.Load<Model>("models/pillar_solo");
-        floor = Core.Content.Load<Model>("models/floor");
-        walltorch = Core.Content.Load<Model>("models/wall_torch");
-        coloredBox = Core.Content.Load<Model>("models/colored_box");
-        rockyBox = Core.Content.Load<Model>("models/rocky_box");
+        tileSet = TileSetLoader.LoadFromFile("Content/tiles.json");
+        wfcGrid = new WFCGrid(WFC_GRID_WIDTH, WFC_GRID_HEIGHT, tileSet);
+        wfcAlgorithm = new WFCAlgorithm(wfcGrid, 42);
+        Console.WriteLine(wfcAlgorithm.Status);
+        wfcAlgorithm.Run();
+        Console.WriteLine(wfcAlgorithm.Status);
 
         // Initialize FPS counter
         SpriteFont fpsFont = Core.Content.Load<SpriteFont>("fonts/fps_font");
         _fpsCounter = new FpsCounter(fpsFont, new Vector2(10, 10), Color.Yellow);
     }
-
-    protected void BuildMap()
-    {
-        Vector3 pillarSoloPosition = new Vector3(-10, 0, 5);
-        Vector3 pillarWallOnePosition = new Vector3(0, 0, 5);
-        pillarSoloWorldMatrix = Matrix.CreateWorld(pillarSoloPosition, Vector3.Forward, Vector3.Up);
-        floorMatrix = Matrix.CreateWorld(Vector3.Zero, Vector3.Forward, Vector3.Up);
-        wallTorchMatrix = Matrix.CreateWorld(new Vector3(0, 0, 1f), Vector3.Forward, Vector3.Up);
-        coloredBoxMatrix = Matrix.CreateWorld(new Vector3(1.25f, 0, 1f), Vector3.Forward, Vector3.Up);
-        rockyBoxMatrix = Matrix.CreateWorld(new Vector3(2.25f, 0, 1f), Vector3.Forward, Vector3.Up);
-    }
-
 
     protected Vector3 GetCamTarget()
     {
@@ -190,11 +171,25 @@ public class WFCPlayGroundScene : Scene
     public override void Draw(GameTime gameTime)
     {
         // Draw 3D models
-        DrawModel(pillarSolo, pillarSoloWorldMatrix);
-        DrawModel(floor, floorMatrix);
-        DrawModel(walltorch, wallTorchMatrix);
-        DrawModel(coloredBox, coloredBoxMatrix);
-        DrawModel(rockyBox, rockyBoxMatrix);
+        // Notes for the morning because im tired.
+        // I believe we need to grab the parent of the varient
+        // get its ModelAssetName make sure it's loaded in. (this should be done in the load function not here).
+        // if there is a rotation applied to the varient, we need to make sure we apply that rotation
+        // to the matrix for that particular cell. I **Think** thats the Vector3.Forward
+        // will need to figure out how to add a 90 or 180 or 270 degree rotation to that vector.
+        for (int y = 0; y < WFC_GRID_HEIGHT; y++)
+        {
+            for (int x = 0; x < WFC_GRID_WIDTH; x++)
+            {
+                WFCCell currentCell = wfcGrid.GetCell(x, y);
+                WFCTileVariant varient = currentCell.CollapsedVariant;
+                Vector3 rotationVector = Vector3.Transform(
+    Vector3.Forward,
+    Matrix.CreateRotationY(MathHelper.ToRadians(varient.RotationDegrees))
+);
+                Matrix matrix = Matrix.CreateWorld(new Vector3(x * TILE_SIZE, 0, y * TILE_SIZE), Vector3.Forward * MathHelper.ToRadians(varient.RotationDegrees), Vector3.Up);
+            }
+        }
 
         // Draw 2D UI
         Core.SpriteBatch.Begin();

@@ -1,0 +1,48 @@
+{
+  "tiles": [
+    {
+      "id": "floor_tile",
+      "model": "models/modular/floor_tile",
+      "rotations": [0],
+      "edges": {
+        "north": ["floor", "pillar_solo", "wall"],
+        "east": ["floor", "pillar_solo", "wall"],
+        "south": ["floor", "pillar_solo", "wall"],
+        "west": ["floor", "pillar_solo", "wall"]
+      }
+    },
+    {
+      "id": "pillar_solo",
+      "model": "models/modular/pillar_solo",
+      "rotations": [0],
+      "edges": {
+        "north": ["floor"],
+        "east": ["floor"],
+        "south": ["floor"],
+        "west": ["floor"]
+      }
+    },
+    {
+      "id": "pillar_wall",
+      "model": "models/modular/pillar_wall_01",
+      "rotations": [0, 90, 180, 270],
+      "edges": {
+        "north": ["floor"],
+        "east": ["wall_rot0", "wall_rot180"],
+        "south": ["floor"],
+        "west": ["floor"]
+      }
+    },
+    {
+      "id": "wall",
+      "model": "models/modular/wall_01",
+      "rotations": [0, 90, 180, 270],
+      "edges": {
+        "north": ["floor"],
+        "east": ["wall_rot0", "wall_rot180", "pillar_wall_rot180"],
+        "south": ["floor"],
+        "west": ["wall_rot0", "wall_rot180", "pillar_wall_rot0"]
+      }
+    }
+  ]
+}
