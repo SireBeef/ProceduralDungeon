@@ -5,21 +5,10 @@
       "model": "models/modular/floor_tile",
       "rotations": [0],
       "edges": {
-        "north": ["floor", "pillar_solo", "wall", "pillar_wall_L", "pillar_wall"],
-        "east": ["floor", "pillar_solo", "wall",  "pillar_wall_L", "pillar_wall"],
-        "south": ["floor", "pillar_solo", "wall",  "pillar_wall_L", "pillar_wall"],
-        "west": ["floor", "pillar_solo", "wall",  "pillar_wall_L", "pillar_wall"]
-      }
-    },
-    {
-      "id": "pillar_solo",
-      "model": "models/modular/pillar_solo",
-      "rotations": [0],
-      "edges": {
-        "north": ["floor"],
-        "east": ["floor"],
-        "south": ["floor"],
-        "west": ["floor"]
+        "north": ["floor", "wall", "pillar_wall_L", "pillar_wall", "pillar_wall_T"],
+        "east": ["floor", "wall",  "pillar_wall_L", "pillar_wall", "pillar_wall_T"],
+        "south": ["floor", "wall",  "pillar_wall_L", "pillar_wall", "pillar_wall_T"],
+        "west": ["floor", "wall",  "pillar_wall_L", "pillar_wall", "pillar_wall_T"]
       }
     },
     {
@@ -28,8 +17,19 @@
       "rotations": [0, 90, 180, 270],
       "edges": {
         "north": ["floor"],
-        "east": ["wall_rot0", "wall_rot180"],
+        "east": ["wall_rot0", "wall_rot180", "pillar_wall_T_rot90", "pillar_wall_T_rot180", "pillar_wall_T_rot270"],
         "south": ["floor"],
+        "west": ["floor"]
+      }
+    },
+    {
+      "id": "pillar_wall_T",
+      "model": "models/modular/pillar_wall_T_01",
+      "rotations": [0, 90, 180, 270],
+      "edges": {
+        "north": ["wall_rot90", "wall_rot270", "pillar_wall_rot90"],
+        "east": ["wall_rot0", "wall_rot180", "pillar_wall_rot180"],
+        "south": ["wall_rot90", "wall_rot270", "pillar_wall_rot270"],
         "west": ["floor"]
       }
     },
@@ -50,9 +50,9 @@
       "rotations": [0, 90, 180, 270],
       "edges": {
         "north": ["floor"],
-        "east": ["wall_rot0", "wall_rot180", "pillar_wall_rot180", "pillar_wall_L_rot90", "pillar_wall_L_rot180"],
+        "east": ["wall_rot0", "wall_rot180", "pillar_wall_rot180", "pillar_wall_L_rot90", "pillar_wall_L_rot180", "pillar_wall_T_rot90", "pillar_wall_T_rot180", "pillar_wall_T_rot270"],
         "south": ["floor"],
-        "west": ["wall_rot0", "wall_rot180", "pillar_wall_rot0", "pillar_wall_L_rot0", "pillar_wall_L_rot270"]
+        "west": ["wall_rot0", "wall_rot180", "pillar_wall_rot0", "pillar_wall_L_rot0", "pillar_wall_L_rot270", "pillar_wall_T_rot0", "pillar_wall_T_rot90", "pillar_wall_T_rot270"]
       }
     }
   ]
