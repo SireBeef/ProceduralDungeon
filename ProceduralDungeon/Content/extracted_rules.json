@@ -1,0 +1,234 @@
+{
+  "tiles": [
+    {
+      "id": "empty_rot0",
+      "model": "empty",
+      "rotation": 0,
+      "edges": {
+        "north": [
+          "empty_rot0",
+          "pillar_wall_L_rot180",
+          "pillar_wall_L_rot270",
+          "wall_rot180"
+        ],
+        "east": [
+          "empty_rot0",
+          "pillar_wall_L_rot0",
+          "pillar_wall_L_rot270",
+          "wall_rot270"
+        ],
+        "south": [
+          "empty_rot0",
+          "pillar_wall_L_rot0",
+          "pillar_wall_L_rot90",
+          "wall_rot0"
+        ],
+        "west": [
+          "empty_rot0",
+          "pillar_wall_L_rot180",
+          "pillar_wall_L_rot90",
+          "wall_rot90"
+        ]
+      }
+    },
+    {
+      "id": "floor_rot0",
+      "model": "models/modular/floor_tile",
+      "rotation": 0,
+      "edges": {
+        "north": [
+          "floor_rot0",
+          "pillar_wall_L_rot270",
+          "wall_rot0"
+        ],
+        "east": [
+          "floor_rot0",
+          "pillar_wall_L_rot0",
+          "pillar_wall_L_rot270",
+          "wall_rot90"
+        ],
+        "south": [
+          "floor_rot0",
+          "pillar_wall_L_rot0",
+          "wall_rot180"
+        ],
+        "west": [
+          "floor_rot0",
+          "wall_rot270"
+        ]
+      }
+    },
+    {
+      "id": "pillar_wall_L_rot0",
+      "model": "models/modular/pillar_wall_L_01",
+      "rotation": 0,
+      "edges": {
+        "north": [
+          "empty_rot0",
+          "floor_rot0"
+        ],
+        "east": [
+          "wall_rot0",
+          "wall_rot180"
+        ],
+        "south": [
+          "wall_rot270",
+          "wall_rot90"
+        ],
+        "west": [
+          "empty_rot0",
+          "floor_rot0"
+        ]
+      }
+    },
+    {
+      "id": "pillar_wall_L_rot180",
+      "model": "models/modular/pillar_wall_L_01",
+      "rotation": 180,
+      "edges": {
+        "north": [
+          "wall_rot90"
+        ],
+        "east": [
+          "empty_rot0"
+        ],
+        "south": [
+          "empty_rot0"
+        ],
+        "west": [
+          "wall_rot180"
+        ]
+      }
+    },
+    {
+      "id": "pillar_wall_L_rot270",
+      "model": "models/modular/pillar_wall_L_01",
+      "rotation": 270,
+      "edges": {
+        "north": [
+          "wall_rot270",
+          "wall_rot90"
+        ],
+        "east": [
+          "wall_rot0",
+          "wall_rot180"
+        ],
+        "south": [
+          "empty_rot0",
+          "floor_rot0"
+        ],
+        "west": [
+          "empty_rot0",
+          "floor_rot0"
+        ]
+      }
+    },
+    {
+      "id": "pillar_wall_L_rot90",
+      "model": "models/modular/pillar_wall_L_01",
+      "rotation": 90,
+      "edges": {
+        "north": [
+          "empty_rot0"
+        ],
+        "east": [
+          "empty_rot0"
+        ],
+        "south": [
+          "wall_rot90"
+        ],
+        "west": [
+          "wall_rot0"
+        ]
+      }
+    },
+    {
+      "id": "wall_rot0",
+      "model": "models/modular/wall_01",
+      "rotation": 0,
+      "edges": {
+        "north": [
+          "empty_rot0"
+        ],
+        "east": [
+          "pillar_wall_L_rot90",
+          "wall_rot0"
+        ],
+        "south": [
+          "floor_rot0"
+        ],
+        "west": [
+          "pillar_wall_L_rot0",
+          "pillar_wall_L_rot270",
+          "wall_rot0"
+        ]
+      }
+    },
+    {
+      "id": "wall_rot180",
+      "model": "models/modular/wall_01",
+      "rotation": 180,
+      "edges": {
+        "north": [
+          "floor_rot0"
+        ],
+        "east": [
+          "pillar_wall_L_rot180",
+          "wall_rot180"
+        ],
+        "south": [
+          "empty_rot0"
+        ],
+        "west": [
+          "pillar_wall_L_rot0",
+          "pillar_wall_L_rot270",
+          "wall_rot180"
+        ]
+      }
+    },
+    {
+      "id": "wall_rot270",
+      "model": "models/modular/wall_01",
+      "rotation": 270,
+      "edges": {
+        "north": [
+          "pillar_wall_L_rot0",
+          "wall_rot270"
+        ],
+        "east": [
+          "floor_rot0"
+        ],
+        "south": [
+          "pillar_wall_L_rot270",
+          "wall_rot270"
+        ],
+        "west": [
+          "empty_rot0"
+        ]
+      }
+    },
+    {
+      "id": "wall_rot90",
+      "model": "models/modular/wall_01",
+      "rotation": 90,
+      "edges": {
+        "north": [
+          "pillar_wall_L_rot0",
+          "pillar_wall_L_rot90",
+          "wall_rot90"
+        ],
+        "east": [
+          "empty_rot0"
+        ],
+        "south": [
+          "pillar_wall_L_rot180",
+          "pillar_wall_L_rot270",
+          "wall_rot90"
+        ],
+        "west": [
+          "floor_rot0"
+        ]
+      }
+    }
+  ]
+}

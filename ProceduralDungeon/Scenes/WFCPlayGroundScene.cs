@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -66,34 +67,47 @@ public class WFCPlayGroundScene : Scene
 
     public override void LoadContent()
     {
-        tileSet = TileSetLoader.LoadFromFile("Content/tiles.json");
+        // Initialize FPS counter first (needed even if WFC fails)
+        SpriteFont fpsFont = Core.Content.Load<SpriteFont>("fonts/fps_font");
+        _fpsCounter = new FpsCounter(fpsFont, new Vector2(10, 10), Color.Yellow);
+
+        tileSet = TileSetLoader.LoadFromFile("Content/extracted_rules.json");
         wfcGrid = new WFCGrid(WFC_GRID_WIDTH, WFC_GRID_HEIGHT, tileSet);
         wfcAlgorithm = new WFCAlgorithm(wfcGrid, 42);
         Console.WriteLine(wfcAlgorithm.Status);
         wfcAlgorithm.Run();
         Console.WriteLine(wfcAlgorithm.Status);
 
-        // Build the models array from the collapsed grid
-        models = new (Model, Matrix)[WFC_GRID_WIDTH * WFC_GRID_HEIGHT];
+        // Build the models list from the collapsed grid (skip empty tiles)
+        var modelList = new List<(Model model, Matrix world)>();
+
+        if (wfcAlgorithm.Status == WFCStatus.Contradiction)
+        {
+            Console.WriteLine("WFC hit a contradiction - rules may be incomplete or conflicting");
+            models = modelList.ToArray();
+            return;
+        }
+
         for (int y = 0; y < WFC_GRID_HEIGHT; y++)
         {
             for (int x = 0; x < WFC_GRID_WIDTH; x++)
             {
                 WFCCell cell = wfcGrid.GetCell(x, y);
-                WFCTileVariant variant = cell.CollapsedVariant;
+                WFCTileVariant? variant = cell.CollapsedVariant;
+
+                // Skip uncollapsed or empty tiles
+                if (variant == null || variant.ModelAssetName == "empty")
+                    continue;
 
                 Model model = Core.Content.Load<Model>(variant.ModelAssetName);
                 Vector3 position = new Vector3(x * TILE_SIZE, 0, y * TILE_SIZE);
                 Matrix rotation = Matrix.CreateRotationY(MathHelper.ToRadians(-variant.RotationDegrees));
                 Matrix world = rotation * Matrix.CreateTranslation(position);
 
-                models[y * WFC_GRID_WIDTH + x] = (model, world);
+                modelList.Add((model, world));
             }
         }
-
-        // Initialize FPS counter
-        SpriteFont fpsFont = Core.Content.Load<SpriteFont>("fonts/fps_font");
-        _fpsCounter = new FpsCounter(fpsFont, new Vector2(10, 10), Color.Yellow);
+        models = modelList.ToArray();
     }
 
     protected Vector3 GetCamTarget()

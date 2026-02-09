@@ -1,59 +1,9 @@
 {
   "tiles": [
-    {
-      "id": "floor",
-      "model": "models/modular/floor_tile",
-      "rotations": [0],
-      "edges": {
-        "north": ["floor", "wall", "pillar_wall_L", "pillar_wall", "pillar_wall_T"],
-        "east": ["floor", "wall",  "pillar_wall_L", "pillar_wall", "pillar_wall_T"],
-        "south": ["floor", "wall",  "pillar_wall_L", "pillar_wall", "pillar_wall_T"],
-        "west": ["floor", "wall",  "pillar_wall_L", "pillar_wall", "pillar_wall_T"]
-      }
-    },
-    {
-      "id": "pillar_wall",
-      "model": "models/modular/pillar_wall_01",
-      "rotations": [0, 90, 180, 270],
-      "edges": {
-        "north": ["floor"],
-        "east": ["wall_rot0", "wall_rot180", "pillar_wall_T_rot90", "pillar_wall_T_rot180", "pillar_wall_T_rot270"],
-        "south": ["floor"],
-        "west": ["floor"]
-      }
-    },
-    {
-      "id": "pillar_wall_T",
-      "model": "models/modular/pillar_wall_T_01",
-      "rotations": [0, 90, 180, 270],
-      "edges": {
-        "north": ["wall_rot90", "wall_rot270", "pillar_wall_rot90"],
-        "east": ["wall_rot0", "wall_rot180", "pillar_wall_rot180"],
-        "south": ["wall_rot90", "wall_rot270", "pillar_wall_rot270"],
-        "west": ["floor"]
-      }
-    },
-    {
-      "id": "pillar_wall_L",
-      "model": "models/modular/pillar_wall_L_01",
-      "rotations": [0, 90, 180, 270],
-      "edges": {
-        "north": ["floor"],
-        "east": ["wall_rot0", "wall_rot180"],
-        "south": ["wall_rot90", "wall_rot270"],
-        "west": ["floor"]
-      }
-    },
-    {
-      "id": "wall",
-      "model": "models/modular/wall_01",
-      "rotations": [0, 90, 180, 270],
-      "edges": {
-        "north": ["floor"],
-        "east": ["wall_rot0", "wall_rot180", "pillar_wall_rot180", "pillar_wall_L_rot90", "pillar_wall_L_rot180", "pillar_wall_T_rot90", "pillar_wall_T_rot180", "pillar_wall_T_rot270"],
-        "south": ["floor"],
-        "west": ["wall_rot0", "wall_rot180", "pillar_wall_rot0", "pillar_wall_L_rot0", "pillar_wall_L_rot270", "pillar_wall_T_rot0", "pillar_wall_T_rot90", "pillar_wall_T_rot270"]
-      }
-    }
+    { "id": "floor", "model": "models/modular/floor_tile", "rotations": [0] },
+    { "id": "wall", "model": "models/modular/wall_01", "rotations": [0, 90, 180, 270] },
+    { "id": "pillar_wall", "model": "models/modular/pillar_wall_01", "rotations": [0, 90, 180, 270] },
+    { "id": "pillar_wall_L", "model": "models/modular/pillar_wall_L_01", "rotations": [0, 90, 180, 270] },
+    { "id": "pillar_wall_T", "model": "models/modular/pillar_wall_T_01", "rotations": [0, 90, 180, 270] }
   ]
 }
