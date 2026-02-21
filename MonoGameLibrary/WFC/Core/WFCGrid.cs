@@ -10,17 +10,18 @@ public class WFCGrid<T> where T : struct, Enum
     public int Width { get; }
     public int Height { get; }
 
-    public WFCGrid(int width, int height)
+    public WFCGrid(int width, int height, WFCAdjacencyRules<T> rules)
     {
         Width = width;
         Height = height;
         _cells = new WFCCell<T>[width, height];
 
+        var knownTiles = rules.KnownTiles;
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
-                _cells[x, y] = new WFCCell<T>(x, y);
+                _cells[x, y] = new WFCCell<T>(x, y, knownTiles);
             }
         }
     }

@@ -16,11 +16,11 @@ public class WFCCell<T> where T : struct, Enum
     public T? CollapsedTile => IsCollapsed ? _possibleTiles.First() : null;
     public IReadOnlyCollection<T> PossibleTiles => _possibleTiles;
 
-    public WFCCell(int x, int y)
+    public WFCCell(int x, int y, IEnumerable<T> initialPossibilities)
     {
         X = x;
         Y = y;
-        _possibleTiles = new HashSet<T>(Enum.GetValues<T>());
+        _possibleTiles = new HashSet<T>(initialPossibilities);
     }
 
     public void Collapse(Random random)

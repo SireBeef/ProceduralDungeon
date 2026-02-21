@@ -22,7 +22,7 @@ public class Game1 : Core
     {
         base.Initialize();
 
-        ChangeScene(new WFCPlayGroundScene());
+        ChangeScene(new BitmapEditorScene());
 
     }
 

@@ -6,9 +6,15 @@ namespace MonoGameLibrary.WFC.Core;
 public class WFCAdjacencyRules<T> where T : struct, Enum
 {
     private readonly Dictionary<T, Dictionary<Direction, HashSet<T>>> _rules = new();
+    private readonly HashSet<T> _knownTiles = new();
+
+    public IReadOnlyCollection<T> KnownTiles => _knownTiles;
 
     public void AddRule(T tile, Direction direction, T allowedNeighbor)
     {
+        _knownTiles.Add(tile);
+        _knownTiles.Add(allowedNeighbor);
+
         if (!_rules.TryGetValue(tile, out var directionRules))
         {
             directionRules = new Dictionary<Direction, HashSet<T>>();

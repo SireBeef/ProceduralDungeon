@@ -12,8 +12,8 @@ public class WFCAlgorithmTests
     [Fact]
     public void WFCAlgorithmConstructor_WhenCreated_StatusIsRunning()
     {
-        var grid = new WFCGrid<TestTile>(3, 3);
         var rules = CreateAllConnectRules();
+        var grid = new WFCGrid<TestTile>(3, 3, rules);
         var algorithm = new WFCAlgorithm<TestTile>(grid, rules, seed: 42);
 
         Assert.Equal(WFCStatus.Running, algorithm.Status);
@@ -22,8 +22,8 @@ public class WFCAlgorithmTests
     [Fact]
     public void WFCAlgorithmStep_WhenCalled_CollapsesAtLeastOneCell()
     {
-        var grid = new WFCGrid<TestTile>(3, 3);
         var rules = CreateAllConnectRules();
+        var grid = new WFCGrid<TestTile>(3, 3, rules);
         var algorithm = new WFCAlgorithm<TestTile>(grid, rules, seed: 42);
         var initialCollapsedCount = CountCollapsedCells(grid);
 
@@ -36,8 +36,8 @@ public class WFCAlgorithmTests
     [Fact]
     public void WFCAlgorithmRun_WhenRulesAreCompatible_CompletesSuccessfully()
     {
-        var grid = new WFCGrid<TestTile>(4, 4);
         var rules = CreateAllConnectRules();
+        var grid = new WFCGrid<TestTile>(4, 4, rules);
         var algorithm = new WFCAlgorithm<TestTile>(grid, rules, seed: 42);
 
         var status = algorithm.Run();
@@ -49,8 +49,8 @@ public class WFCAlgorithmTests
     [Fact]
     public void WFCAlgorithmRun_WhenCompleted_AllCellsAreCollapsed()
     {
-        var grid = new WFCGrid<TestTile>(4, 4);
         var rules = CreateAllConnectRules();
+        var grid = new WFCGrid<TestTile>(4, 4, rules);
         var algorithm = new WFCAlgorithm<TestTile>(grid, rules, seed: 42);
 
         algorithm.Run();
@@ -65,8 +65,8 @@ public class WFCAlgorithmTests
     [Fact]
     public void WFCAlgorithmStep_WhenAlreadyCompleted_ReturnsCompleted()
     {
-        var grid = new WFCGrid<TestTile>(4, 4);
         var rules = CreateAllConnectRules();
+        var grid = new WFCGrid<TestTile>(4, 4, rules);
         var algorithm = new WFCAlgorithm<TestTile>(grid, rules, seed: 42);
         algorithm.Run();
 
@@ -80,11 +80,11 @@ public class WFCAlgorithmTests
     {
         var rules = CreateAllConnectRules();
 
-        var grid1 = new WFCGrid<TestTile>(4, 4);
+        var grid1 = new WFCGrid<TestTile>(4, 4, rules);
         var algorithm1 = new WFCAlgorithm<TestTile>(grid1, rules, seed: 123);
         algorithm1.Run();
 
-        var grid2 = new WFCGrid<TestTile>(4, 4);
+        var grid2 = new WFCGrid<TestTile>(4, 4, rules);
         var algorithm2 = new WFCAlgorithm<TestTile>(grid2, rules, seed: 123);
         algorithm2.Run();
 
@@ -108,7 +108,7 @@ public class WFCAlgorithmTests
         rules.AddRule(SingleTile.Floor, Direction.South, SingleTile.Floor);
         rules.AddRule(SingleTile.Floor, Direction.West, SingleTile.Floor);
 
-        var grid = new WFCGrid<SingleTile>(3, 3);
+        var grid = new WFCGrid<SingleTile>(3, 3, rules);
         var algorithm = new WFCAlgorithm<SingleTile>(grid, rules, seed: 42);
 
         var status = algorithm.Run();
@@ -123,33 +123,26 @@ public class WFCAlgorithmTests
     [Fact]
     public void WFCAlgorithmRun_WhenTwoSelfCompatibleTypes_Completes()
     {
-        // Two tile types that are each self-compatible but mutually exclusive
         var rules = new WFCAdjacencyRules<TestTile>();
 
-        // Floor only connects to Floor
         rules.AddRule(TestTile.Floor, Direction.North, TestTile.Floor);
         rules.AddRule(TestTile.Floor, Direction.East, TestTile.Floor);
         rules.AddRule(TestTile.Floor, Direction.South, TestTile.Floor);
         rules.AddRule(TestTile.Floor, Direction.West, TestTile.Floor);
 
-        // Wall only connects to Wall
         rules.AddRule(TestTile.Wall, Direction.North, TestTile.Wall);
         rules.AddRule(TestTile.Wall, Direction.East, TestTile.Wall);
         rules.AddRule(TestTile.Wall, Direction.South, TestTile.Wall);
         rules.AddRule(TestTile.Wall, Direction.West, TestTile.Wall);
 
-        var grid = new WFCGrid<TestTile>(2, 2);
+        var grid = new WFCGrid<TestTile>(2, 2, rules);
         var algorithm = new WFCAlgorithm<TestTile>(grid, rules, seed: 42);
 
         var status = algorithm.Run();
 
-        // Should complete because propagation forces all cells to same tile type
         Assert.Equal(WFCStatus.Completed, status);
     }
 
-    /// <summary>
-    /// Creates rules where every tile type can be adjacent to every tile type in all directions.
-    /// </summary>
     private static WFCAdjacencyRules<TestTile> CreateAllConnectRules()
     {
         var rules = new WFCAdjacencyRules<TestTile>();
@@ -157,15 +150,9 @@ public class WFCAlgorithmTests
         var allDirections = new[] { Direction.North, Direction.East, Direction.South, Direction.West };
 
         foreach (var tile in allTiles)
-        {
             foreach (var dir in allDirections)
-            {
                 foreach (var neighbor in allTiles)
-                {
                     rules.AddRule(tile, dir, neighbor);
-                }
-            }
-        }
 
         return rules;
     }
