@@ -1,0 +1,135 @@
+{
+  "tileSize": 2.0,
+  "rules": [
+    {
+      "name": "t_junction_north_open",
+      "center": "Floor",
+      "north": "Floor",
+      "east": "Empty",
+      "south": "Empty",
+      "west": "Empty",
+      "model": "models/modular/pillar_wall_T_01",
+      "rotation": 0
+    },
+    {
+      "name": "t_junction_east_open",
+      "center": "Floor",
+      "north": "Empty",
+      "east": "Floor",
+      "south": "Empty",
+      "west": "Empty",
+      "model": "models/modular/pillar_wall_T_01",
+      "rotation": 90
+    },
+    {
+      "name": "t_junction_south_open",
+      "center": "Floor",
+      "north": "Empty",
+      "east": "Empty",
+      "south": "Floor",
+      "west": "Empty",
+      "model": "models/modular/pillar_wall_T_01",
+      "rotation": 180
+    },
+    {
+      "name": "t_junction_west_open",
+      "center": "Floor",
+      "north": "Empty",
+      "east": "Empty",
+      "south": "Empty",
+      "west": "Floor",
+      "model": "models/modular/pillar_wall_T_01",
+      "rotation": 270
+    },
+    {
+      "name": "corner_SE",
+      "center": "Floor",
+      "north": "Floor",
+      "east": "Empty",
+      "south": "Empty",
+      "west": "Floor",
+      "model": "models/modular/pillar_wall_L_01",
+      "rotation": 0
+    },
+    {
+      "name": "corner_SW",
+      "center": "Floor",
+      "north": "Floor",
+      "east": "Floor",
+      "south": "Empty",
+      "west": "Empty",
+      "model": "models/modular/pillar_wall_L_01",
+      "rotation": 90
+    },
+    {
+      "name": "corner_NW",
+      "center": "Floor",
+      "north": "Empty",
+      "east": "Floor",
+      "south": "Floor",
+      "west": "Empty",
+      "model": "models/modular/pillar_wall_L_01",
+      "rotation": 180
+    },
+    {
+      "name": "corner_NE",
+      "center": "Floor",
+      "north": "Empty",
+      "east": "Empty",
+      "south": "Floor",
+      "west": "Floor",
+      "model": "models/modular/pillar_wall_L_01",
+      "rotation": 270
+    },
+    {
+      "name": "wall_east",
+      "center": "Floor",
+      "north": "*",
+      "east": "Empty",
+      "south": "*",
+      "west": "Floor",
+      "model": "models/modular/pillar_wall_01",
+      "rotation": 0
+    },
+    {
+      "name": "wall_south",
+      "center": "Floor",
+      "north": "Floor",
+      "east": "*",
+      "south": "Empty",
+      "west": "*",
+      "model": "models/modular/pillar_wall_01",
+      "rotation": 90
+    },
+    {
+      "name": "wall_west",
+      "center": "Floor",
+      "north": "*",
+      "east": "Floor",
+      "south": "*",
+      "west": "Empty",
+      "model": "models/modular/pillar_wall_01",
+      "rotation": 180
+    },
+    {
+      "name": "wall_north",
+      "center": "Floor",
+      "north": "Empty",
+      "east": "*",
+      "south": "Floor",
+      "west": "*",
+      "model": "models/modular/pillar_wall_01",
+      "rotation": 270
+    },
+    {
+      "name": "floor",
+      "center": "Floor",
+      "north": "*",
+      "east": "*",
+      "south": "*",
+      "west": "*",
+      "model": "models/modular/floor_tile",
+      "rotation": 0
+    }
+  ]
+}

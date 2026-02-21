@@ -1,10 +1,12 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGameLibrary;
 using MonoGameLibrary.Scenes;
 using MonoGameLibrary.UI;
+using ProceduralDungeon.Passes;
 
 namespace ProceduralDungeon.Scenes;
 
@@ -28,6 +30,17 @@ public class WFCPlayGroundScene : Scene
 
     (Model model, Matrix world)[] models;
 
+    private readonly DungeonGrid _dungeonGrid;
+    private readonly float _tileSize;
+
+    public WFCPlayGroundScene() : this(null, 2f) { }
+
+    public WFCPlayGroundScene(DungeonGrid grid, float tileSize)
+    {
+        _dungeonGrid = grid;
+        _tileSize = tileSize;
+    }
+
     public override void Initialize()
     {
         // LoadContent is called during base.Initialize().
@@ -36,10 +49,19 @@ public class WFCPlayGroundScene : Scene
         Core.ExitOnEscape = true;
         Core.Instance.IsMouseVisible = false;
 
-        // Set up Camera
-        camPosition = new Vector3(0f, .7f, 6f);
+        if (_dungeonGrid != null)
+        {
+            // Position camera above the center of the grid, looking down at an angle
+            float centerX = _dungeonGrid.Width * _tileSize / 2f;
+            float centerZ = _dungeonGrid.Height * _tileSize / 2f;
+            camPosition = new Vector3(centerX, 15f, centerZ + 10f);
+            pitch = -0.6f;
+        }
+        else
+        {
+            camPosition = new Vector3(0f, .7f, 6f);
+        }
         yaw = 0f;
-        pitch = 0f;
 
         projectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(45), Core.GraphicsDevice.DisplayMode.AspectRatio, 0.1f, 1000f);
         viewMatrix = Matrix.CreateLookAt(camPosition, GetCamTarget(), Vector3.Up);
@@ -59,8 +81,27 @@ public class WFCPlayGroundScene : Scene
         SpriteFont fpsFont = Core.Content.Load<SpriteFont>("fonts/fps_font");
         _fpsCounter = new FpsCounter(fpsFont, new Vector2(10, 10), Color.Yellow);
 
-        // Empty models array - ready for new pipeline
-        models = Array.Empty<(Model, Matrix)>();
+        if (_dungeonGrid != null)
+        {
+            var modelCache = new Dictionary<string, Model>();
+            var placements = new List<(Model, Matrix)>();
+
+            foreach (var p in _dungeonGrid.ModelPlacements)
+            {
+                if (!modelCache.TryGetValue(p.ModelAsset, out var model))
+                {
+                    model = Core.Content.Load<Model>(p.ModelAsset);
+                    modelCache[p.ModelAsset] = model;
+                }
+                placements.Add((model, p.ToWorldMatrix(_tileSize)));
+            }
+
+            models = placements.ToArray();
+        }
+        else
+        {
+            models = Array.Empty<(Model, Matrix)>();
+        }
     }
 
     protected Vector3 GetCamTarget()

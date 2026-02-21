@@ -10,6 +10,7 @@ using MonoGameLibrary;
 using MonoGameLibrary.Input;
 using MonoGameLibrary.Scenes;
 using MonoGameLibrary.WFC.Core;
+using ProceduralDungeon.Passes;
 using ProceduralDungeon.WFC;
 
 namespace ProceduralDungeon.Scenes;
@@ -192,6 +193,10 @@ public class BitmapEditorScene : Scene
             _patternSize--;
         if (kb.WasKeyJustPressed(Keys.F9) && _patternSize < 5)
             _patternSize++;
+
+        // F10: View 3D (run Pass 2 pipeline and switch to 3D scene)
+        if (kb.WasKeyJustPressed(Keys.F10))
+            ViewIn3D();
     }
 
     private void Generate()
@@ -221,6 +226,32 @@ public class BitmapEditorScene : Scene
         _generationStatus = success
             ? $"OK (seed:{_seed} N:{_patternSize} patterns:{_patternCount})"
             : $"Contradiction (seed:{_seed} N:{_patternSize} patterns:{_patternCount})";
+    }
+
+    private void ViewIn3D()
+    {
+        // Check if we have a generated output
+        bool hasOutput = false;
+        for (int x = 0; x < OUTPUT_WIDTH && !hasOutput; x++)
+            for (int y = 0; y < OUTPUT_HEIGHT && !hasOutput; y++)
+                if (_outputGrid[x, y].HasValue) hasOutput = true;
+
+        if (!hasOutput)
+        {
+            _statusMessage = "Generate first (F5) before viewing 3D";
+            return;
+        }
+
+        var grid = new DungeonGrid(OUTPUT_WIDTH, OUTPUT_HEIGHT);
+        for (int x = 0; x < OUTPUT_WIDTH; x++)
+            for (int y = 0; y < OUTPUT_HEIGHT; y++)
+                grid.Layout[x, y] = _outputGrid[x, y] ?? BitmapTile.Empty;
+
+        var pass = new ModelAssignmentPass("Content/passes/model_assignment.json");
+        var pipeline = new DungeonPipeline().Add(pass);
+        pipeline.Run(grid);
+
+        Core.ChangeScene(new WFCPlayGroundScene(grid, pass.TileSize));
     }
 
     private void EnterTypingMode()
@@ -367,7 +398,8 @@ public class BitmapEditorScene : Scene
         string helpText = $"Selected: {selectedTile}  |  Pattern size: {_patternSize}x{_patternSize}\n" +
                          $"Status: {statusLine}\n" +
                          $"LMB: Paint | RMB: Erase | Scroll/1-2: Select tile | WASD: Pan\n" +
-                         $"F2: Save | F3: Load | F5: Generate | F6: Clear | F7: New seed | F8/F9: Pattern size -/+";
+                         $"F2: Save | F3: Load | F5: Generate | F6: Clear | F7: New seed\n" +
+                         $"F8/F9: Pattern size -/+ | F10: View 3D";
 
         int uiY = refOriginY + Math.Max(REF_HEIGHT, OUTPUT_HEIGHT) * CELL_SIZE + GAP;
         Core.SpriteBatch.DrawString(_font, helpText, new Vector2(refOriginX, uiY), Color.White);
