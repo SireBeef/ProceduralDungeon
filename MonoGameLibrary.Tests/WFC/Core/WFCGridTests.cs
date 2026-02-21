@@ -1,6 +1,6 @@
+using System;
+using System.Linq;
 using MonoGameLibrary.WFC.Core;
-using MonoGameLibrary.WFC.Edges;
-using MonoGameLibrary.WFC.Tiles;
 using Xunit;
 
 namespace MonoGameLibrary.Tests.WFC.Core;
@@ -10,29 +10,26 @@ public class WFCGridTests
     [Fact]
     public void WFCGridConstructor_WhenCreated_HasCorrectDimensions()
     {
-        var tileSet = CreateTestTileSet();
-        var grid = new WFCGrid(5, 3, tileSet);
+        var grid = new WFCGrid<TestTile>(5, 3);
 
         Assert.Equal(5, grid.Width);
         Assert.Equal(3, grid.Height);
     }
 
     [Fact]
-    public void WFCGridConstructor_WhenCreated_AllCellsHaveAllVariants()
+    public void WFCGridConstructor_WhenCreated_AllCellsHaveAllEnumValues()
     {
-        var tileSet = CreateTestTileSet();
-        var grid = new WFCGrid(3, 3, tileSet);
+        var grid = new WFCGrid<TestTile>(3, 3);
 
         var cell = grid.GetCell(1, 1);
 
-        Assert.Equal(tileSet.Variants.Count, cell.Entropy);
+        Assert.Equal(Enum.GetValues<TestTile>().Length, cell.Entropy);
     }
 
     [Fact]
     public void WFCGridGetCell_WhenValidPosition_ReturnsCell()
     {
-        var tileSet = CreateTestTileSet();
-        var grid = new WFCGrid(3, 3, tileSet);
+        var grid = new WFCGrid<TestTile>(3, 3);
 
         var cell = grid.GetCell(2, 1);
 
@@ -44,8 +41,7 @@ public class WFCGridTests
     [Fact]
     public void WFCGridIsInBounds_WhenInsideGrid_ReturnsTrue()
     {
-        var tileSet = CreateTestTileSet();
-        var grid = new WFCGrid(5, 5, tileSet);
+        var grid = new WFCGrid<TestTile>(5, 5);
 
         Assert.True(grid.IsInBounds(0, 0));
         Assert.True(grid.IsInBounds(4, 4));
@@ -55,8 +51,7 @@ public class WFCGridTests
     [Fact]
     public void WFCGridIsInBounds_WhenOutsideGrid_ReturnsFalse()
     {
-        var tileSet = CreateTestTileSet();
-        var grid = new WFCGrid(5, 5, tileSet);
+        var grid = new WFCGrid<TestTile>(5, 5);
 
         Assert.False(grid.IsInBounds(-1, 0));
         Assert.False(grid.IsInBounds(0, -1));
@@ -67,8 +62,7 @@ public class WFCGridTests
     [Fact]
     public void WFCGridGetNeighbor_WhenNeighborExists_ReturnsNeighbor()
     {
-        var tileSet = CreateTestTileSet();
-        var grid = new WFCGrid(3, 3, tileSet);
+        var grid = new WFCGrid<TestTile>(3, 3);
         var centerCell = grid.GetCell(1, 1);
 
         var northNeighbor = grid.GetNeighbor(centerCell, Direction.North);
@@ -96,8 +90,7 @@ public class WFCGridTests
     [Fact]
     public void WFCGridGetNeighbor_WhenAtEdge_ReturnsNull()
     {
-        var tileSet = CreateTestTileSet();
-        var grid = new WFCGrid(3, 3, tileSet);
+        var grid = new WFCGrid<TestTile>(3, 3);
         var cornerCell = grid.GetCell(0, 0);
 
         var northNeighbor = grid.GetNeighbor(cornerCell, Direction.North);
@@ -110,8 +103,7 @@ public class WFCGridTests
     [Fact]
     public void WFCGridGetNeighbors_WhenCenterCell_ReturnsFourNeighbors()
     {
-        var tileSet = CreateTestTileSet();
-        var grid = new WFCGrid(3, 3, tileSet);
+        var grid = new WFCGrid<TestTile>(3, 3);
         var centerCell = grid.GetCell(1, 1);
 
         var neighbors = grid.GetNeighbors(centerCell).ToList();
@@ -122,8 +114,7 @@ public class WFCGridTests
     [Fact]
     public void WFCGridGetNeighbors_WhenCornerCell_ReturnsTwoNeighbors()
     {
-        var tileSet = CreateTestTileSet();
-        var grid = new WFCGrid(3, 3, tileSet);
+        var grid = new WFCGrid<TestTile>(3, 3);
         var cornerCell = grid.GetCell(0, 0);
 
         var neighbors = grid.GetNeighbors(cornerCell).ToList();
@@ -134,8 +125,7 @@ public class WFCGridTests
     [Fact]
     public void WFCGridIsFullyCollapsed_WhenNoCellsCollapsed_ReturnsFalse()
     {
-        var tileSet = CreateTestTileSet();
-        var grid = new WFCGrid(3, 3, tileSet);
+        var grid = new WFCGrid<TestTile>(3, 3);
 
         Assert.False(grid.IsFullyCollapsed());
     }
@@ -143,8 +133,7 @@ public class WFCGridTests
     [Fact]
     public void WFCGridIsFullyCollapsed_WhenAllCellsCollapsed_ReturnsTrue()
     {
-        var tileSet = CreateTestTileSet();
-        var grid = new WFCGrid(2, 2, tileSet);
+        var grid = new WFCGrid<TestTile>(2, 2);
         var random = new Random(42);
 
         foreach (var cell in grid.AllCells())
@@ -158,8 +147,7 @@ public class WFCGridTests
     [Fact]
     public void WFCGridHasContradiction_WhenNoContradictions_ReturnsFalse()
     {
-        var tileSet = CreateTestTileSet();
-        var grid = new WFCGrid(3, 3, tileSet);
+        var grid = new WFCGrid<TestTile>(3, 3);
 
         Assert.False(grid.HasContradiction());
     }
@@ -167,8 +155,7 @@ public class WFCGridTests
     [Fact]
     public void WFCGridGetLowestEntropyCell_WhenAllSameEntropy_ReturnsACell()
     {
-        var tileSet = CreateTestTileSet();
-        var grid = new WFCGrid(3, 3, tileSet);
+        var grid = new WFCGrid<TestTile>(3, 3);
 
         var lowestCell = grid.GetLowestEntropyCell();
 
@@ -178,16 +165,11 @@ public class WFCGridTests
     [Fact]
     public void WFCGridGetLowestEntropyCell_WhenOneCellHasLowerEntropy_ReturnsThatCell()
     {
-        var tileSet = CreateTestTileSet();
-        var grid = new WFCGrid(3, 3, tileSet);
+        var grid = new WFCGrid<TestTile>(3, 3);
         var targetCell = grid.GetCell(1, 1);
 
-        // Remove some possibilities to lower entropy, but leave at least 2 so it's not collapsed
-        var variants = targetCell.PossibleVariants.ToList();
-        for (int i = 2; i < variants.Count; i++)
-        {
-            targetCell.RemovePossibility(variants[i]);
-        }
+        // Remove one possibility to lower entropy but keep at least 2
+        targetCell.RemovePossibility(TestTile.Empty);
 
         var lowestCell = grid.GetLowestEntropyCell();
 
@@ -197,8 +179,7 @@ public class WFCGridTests
     [Fact]
     public void WFCGridGetLowestEntropyCell_WhenAllCollapsed_ReturnsNull()
     {
-        var tileSet = CreateTestTileSet();
-        var grid = new WFCGrid(2, 2, tileSet);
+        var grid = new WFCGrid<TestTile>(2, 2);
         var random = new Random(42);
 
         foreach (var cell in grid.AllCells())
@@ -214,36 +195,10 @@ public class WFCGridTests
     [Fact]
     public void WFCGridAllCells_ReturnsAllCells()
     {
-        var tileSet = CreateTestTileSet();
-        var grid = new WFCGrid(3, 4, tileSet);
+        var grid = new WFCGrid<TestTile>(3, 4);
 
         var allCells = grid.AllCells().ToList();
 
         Assert.Equal(12, allCells.Count);
-    }
-
-    private static WFCTileSet CreateTestTileSet()
-    {
-        var tileSet = new WFCTileSet();
-
-        var floorEdges = new Dictionary<Direction, WFCEdge>
-        {
-            { Direction.North, new WFCEdge(new[] { "floor" }) },
-            { Direction.East, new WFCEdge(new[] { "floor" }) },
-            { Direction.South, new WFCEdge(new[] { "floor" }) },
-            { Direction.West, new WFCEdge(new[] { "floor" }) }
-        };
-        tileSet.AddTile(new WFCTile("floor", floorEdges, new[] { 0 }, "Models/floor"));
-
-        var wallEdges = new Dictionary<Direction, WFCEdge>
-        {
-            { Direction.North, new WFCEdge(new[] { "empty" }) },
-            { Direction.East, new WFCEdge(new[] { "wall_rot0" }) },
-            { Direction.South, new WFCEdge(new[] { "empty" }) },
-            { Direction.West, new WFCEdge(new[] { "wall_rot0" }) }
-        };
-        tileSet.AddTile(new WFCTile("wall", wallEdges, new[] { 0, 90 }, "Models/wall"));
-
-        return tileSet;
     }
 }

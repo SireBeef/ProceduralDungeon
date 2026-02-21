@@ -1,7 +1,7 @@
-using MonoGameLibrary.WFC.Edges;
+using MonoGameLibrary.WFC.Core;
 using Xunit;
 
-namespace MonoGameLibrary.Tests.WFC.Edges;
+namespace MonoGameLibrary.Tests.WFC.Core;
 
 public class DirectionTests
 {

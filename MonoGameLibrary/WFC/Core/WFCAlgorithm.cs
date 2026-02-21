@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using MonoGameLibrary.WFC.Edges;
 
 namespace MonoGameLibrary.WFC.Core;
 
@@ -11,24 +10,23 @@ public enum WFCStatus
     Contradiction
 }
 
-public class WFCAlgorithm
+public class WFCAlgorithm<T> where T : struct, Enum
 {
-    private readonly WFCGrid _grid;
+    private readonly WFCGrid<T> _grid;
+    private readonly WFCAdjacencyRules<T> _rules;
     private readonly Random _random;
 
     public WFCStatus Status { get; private set; } = WFCStatus.Running;
 
-    public WFCAlgorithm(WFCGrid grid, Random random)
+    public WFCAlgorithm(WFCGrid<T> grid, WFCAdjacencyRules<T> rules, Random random)
     {
         _grid = grid;
+        _rules = rules;
         _random = random;
     }
 
-    public WFCAlgorithm(WFCGrid grid, int seed) : this(grid, new Random(seed))
-    {
-    }
-
-    public WFCAlgorithm(WFCGrid grid) : this(grid, new Random())
+    public WFCAlgorithm(WFCGrid<T> grid, WFCAdjacencyRules<T> rules, int seed)
+        : this(grid, rules, new Random(seed))
     {
     }
 
@@ -80,9 +78,9 @@ public class WFCAlgorithm
         return Status;
     }
 
-    private void Propagate(WFCCell startCell)
+    private void Propagate(WFCCell<T> startCell)
     {
-        var queue = new Queue<WFCCell>();
+        var queue = new Queue<WFCCell<T>>();
         queue.Enqueue(startCell);
 
         while (queue.Count > 0)
@@ -94,7 +92,17 @@ public class WFCAlgorithm
                 if (neighbor.IsCollapsed)
                     continue;
 
-                int removed = neighbor.RemoveIncompatibleVariants(direction, cell.PossibleVariants);
+                // Compute the union of allowed neighbors for all possible tiles in this cell
+                var allowedInNeighbor = new HashSet<T>();
+                foreach (var tile in cell.PossibleTiles)
+                {
+                    foreach (var allowed in _rules.GetAllowedNeighbors(tile, direction))
+                    {
+                        allowedInNeighbor.Add(allowed);
+                    }
+                }
+
+                int removed = neighbor.RetainOnly(allowedInNeighbor);
 
                 if (removed > 0 && !neighbor.IsContradiction)
                 {

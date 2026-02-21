@@ -1,11 +1,100 @@
-Current implementation:
+Architecture Plan
+=================
 
-Right now we have a generator build a rule set based off of a definition in an editor that uses the actual 3d models.  This is not how the original WFC algorithm works, and probably not how we will want it to work going forward.
+Overview
+--------
+The procedural generation system uses a multi-pass pipeline approach. Each pass
+transforms the grid data, building on the results of the previous pass. The
+pipeline is modular and pluggable - different biome types can define their own
+sequence of passes with different rulesets.
 
-What we should be doing is actually do the bitmap definition like the original algorithm and use that to build the simple ruleset.
-Then what we should do is make a second pass where we then fill each pixel in based upon the context.
+Multi-Pass Pipeline
+-------------------
+The generation is NOT a single WFC run that places 3D models directly. Instead
+it is a series of passes that progressively refine the output:
 
-For example, think of a binary ruleset.  pass 1 would build the map in black and white. pass 2 would then determine what pixels of that map get mapped to walls, corners, etc.
+  Pass 1 - Abstract Layout (WFC)
+    Generate a bitmap-style layout using simple tile types (e.g., floor/empty).
+    This follows the original WFC algorithm more closely - small reference
+    pattern, rotations/mirrors to build 8 variations per tile, 3x3 neighborhood
+    matching. The tile types should be extendable beyond binary (e.g., adding
+    "doorway" as a third color for room connectivity).
 
-so second phase would look something like, its a wall if the north and south are empty, or if the norht is empty and the south is a floor.
-its a corner tile if N, W, NW, and SE is empty and E and S are walls.
+  Pass 2 - 3D Model Assignment (Pattern Matching)
+    Walk the grid and deterministically assign 3D models based on each cell's
+    neighborhood context. For example:
+      - wall if N and S are empty, or if N is empty and S is floor
+      - corner tile if N, W, NW, SE are empty and E, S are walls
+    This is not WFC - it is rule-based pattern matching.
+
+  Pass 3 - Room/Hallway Classification
+    Identify rooms and hallways from the layout. Modify if needed (ensure
+    connectivity, minimum room sizes, etc.).
+
+  Pass 4 - Decoration Placement
+    Add props, torches, furniture, etc. based on room type and context.
+
+  Pass 5 - Ground Detail
+    Add grass, floor tile variations, rubble, etc.
+
+  ...additional passes as needed per biome.
+
+Each pass is a plugin. A biome definition specifies which passes to run and in
+what order, along with the rulesets/configuration for each pass.
+
+WFC Algorithm Notes
+-------------------
+The original WFC algorithm builds 8 variations for each reference tile:
+  - 4 rotations (0, 90, 180, 270)
+  - 4 mirrored rotations
+This rotation/mirror system is still relevant for Pass 1 when building the
+reference pattern set from the input bitmap. It is the per-3D-model socket
+system that was overengineered - the 3D model assignment happens in Pass 2
+via deterministic pattern matching, not WFC.
+
+Editor Requirements
+-------------------
+Each pass type needs visual tooling:
+
+  - Pass 1 editor: Bitmap-style grid editor for defining WFC reference patterns.
+    Paint cells with colors (black/white/yellow/etc.) to define the input that
+    WFC learns from. Must be extendable to support more than binary tile types.
+    Should be able to fire off generation and see results immediately.
+
+  - Pass 2 editor: View 3D model assignments overlaid on the abstract layout.
+    See cardinal directions to understand asset orientation. Verify pattern
+    matching rules produce correct results.
+
+  - Editors should be pluggable per pass type, same as the passes themselves.
+
+Region System (Future)
+----------------------
+At a higher level, a large world grid (e.g., 200x200) is divided into regions.
+Each region is assigned a biome type which determines its pass pipeline and
+rulesets. For example:
+  - A 30x30 region uses a "house" biome with house-specific passes/rules
+  - A 50x50 region uses a "garden" biome with garden-specific passes/rules
+  - Regions may need transition/border logic between different biome types
+
+This is not being built now, but the pass/pipeline architecture must be
+extensible enough to support it later.
+
+What Exists Today
+-----------------
+  - WFC core: WFCCell, WFCGrid, WFCAlgorithm (observe/propagate loop)
+  - Edge/direction system (Direction enum, WFCEdge, SocketRotation)
+  - JSON tile definition loading (TileSetLoader)
+  - Cardinal direction indicator for 3D scenes
+  - Test infrastructure (103 tests, xUnit)
+  - 3D playground scenes for viewing assets
+
+What Needs to Change
+--------------------
+  - Refactor WFC to work with bitmap/color tiles instead of 3D-model-specific
+    socket matching
+  - Implement the rotation/mirror reference building from original WFC
+  - Build the pass pipeline system (pluggable, ordered passes)
+  - Build Pass 2 pattern matching for 3D model assignment
+  - Build editor tooling for Pass 1 (bitmap editor with live generation preview)
+  - The existing WFC core (cell, grid, algorithm) is still useful but the
+    tile/edge model needs to be simplified for the bitmap approach

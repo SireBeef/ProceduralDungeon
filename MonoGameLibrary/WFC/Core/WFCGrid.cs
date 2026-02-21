@@ -1,33 +1,31 @@
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using MonoGameLibrary.WFC.Edges;
 
 namespace MonoGameLibrary.WFC.Core;
 
-public class WFCGrid
+public class WFCGrid<T> where T : struct, Enum
 {
-    private readonly WFCCell[,] _cells;
+    private readonly WFCCell<T>[,] _cells;
 
     public int Width { get; }
     public int Height { get; }
 
-    public WFCGrid(int width, int height, WFCTileSet tileSet)
+    public WFCGrid(int width, int height)
     {
         Width = width;
         Height = height;
-        _cells = new WFCCell[width, height];
+        _cells = new WFCCell<T>[width, height];
 
-        var allVariants = tileSet.Variants;
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
-                _cells[x, y] = new WFCCell(x, y, allVariants);
+                _cells[x, y] = new WFCCell<T>(x, y);
             }
         }
     }
 
-    public WFCCell GetCell(int x, int y)
+    public WFCCell<T> GetCell(int x, int y)
     {
         return _cells[x, y];
     }
@@ -37,7 +35,7 @@ public class WFCGrid
         return x >= 0 && x < Width && y >= 0 && y < Height;
     }
 
-    public WFCCell? GetNeighbor(WFCCell cell, Direction direction)
+    public WFCCell<T>? GetNeighbor(WFCCell<T> cell, Direction direction)
     {
         int nx = cell.X;
         int ny = cell.Y;
@@ -53,7 +51,7 @@ public class WFCGrid
         return IsInBounds(nx, ny) ? _cells[nx, ny] : null;
     }
 
-    public IEnumerable<(WFCCell neighbor, Direction direction)> GetNeighbors(WFCCell cell)
+    public IEnumerable<(WFCCell<T> neighbor, Direction direction)> GetNeighbors(WFCCell<T> cell)
     {
         foreach (Direction dir in new[] { Direction.North, Direction.East, Direction.South, Direction.West })
         {
@@ -91,9 +89,9 @@ public class WFCGrid
         return false;
     }
 
-    public WFCCell? GetLowestEntropyCell()
+    public WFCCell<T>? GetLowestEntropyCell()
     {
-        WFCCell? lowest = null;
+        WFCCell<T>? lowest = null;
         int lowestEntropy = int.MaxValue;
 
         for (int x = 0; x < Width; x++)
@@ -112,7 +110,7 @@ public class WFCGrid
         return lowest;
     }
 
-    public IEnumerable<WFCCell> AllCells()
+    public IEnumerable<WFCCell<T>> AllCells()
     {
         for (int y = 0; y < Height; y++)
         {

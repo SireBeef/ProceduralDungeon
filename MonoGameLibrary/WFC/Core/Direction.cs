@@ -1,6 +1,6 @@
 using System;
 
-namespace MonoGameLibrary.WFC.Edges;
+namespace MonoGameLibrary.WFC.Core;
 
 public enum Direction
 {

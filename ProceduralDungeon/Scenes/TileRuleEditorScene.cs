@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework.Input;
 using MonoGameLibrary;
 using MonoGameLibrary.Scenes;
 using System.Text.Json.Serialization;
-using MonoGameLibrary.WFC.Edges;
+using MonoGameLibrary.WFC.Core;
 
 namespace ProceduralDungeon.Scenes;
 

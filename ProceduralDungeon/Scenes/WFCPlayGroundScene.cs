@@ -1,23 +1,15 @@
 using System;
-using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGameLibrary;
 using MonoGameLibrary.Scenes;
 using MonoGameLibrary.UI;
-using MonoGameLibrary.WFC.Config;
-using MonoGameLibrary.WFC.Core;
-using MonoGameLibrary.WFC.Tiles;
 
 namespace ProceduralDungeon.Scenes;
 
 public class WFCPlayGroundScene : Scene
 {
-
-    private static int WFC_GRID_HEIGHT = 50;
-    private static int WFC_GRID_WIDTH = 50;
-    private static int TILE_SIZE = 2;
     private static float MOVEMENT_SPEED = 0.1f;
     private static float MOUSE_SENSITIVITY = 0.25f;
 
@@ -33,10 +25,6 @@ public class WFCPlayGroundScene : Scene
     Matrix projectionMatrix;
     // Camera's physical position location & orientation
     Matrix viewMatrix;
-
-    WFCTileSet tileSet;
-    WFCGrid wfcGrid;
-    WFCAlgorithm wfcAlgorithm;
 
     (Model model, Matrix world)[] models;
 
@@ -67,47 +55,12 @@ public class WFCPlayGroundScene : Scene
 
     public override void LoadContent()
     {
-        // Initialize FPS counter first (needed even if WFC fails)
+        // Initialize FPS counter
         SpriteFont fpsFont = Core.Content.Load<SpriteFont>("fonts/fps_font");
         _fpsCounter = new FpsCounter(fpsFont, new Vector2(10, 10), Color.Yellow);
 
-        tileSet = TileSetLoader.LoadFromFile("Content/extracted_rules.json");
-        wfcGrid = new WFCGrid(WFC_GRID_WIDTH, WFC_GRID_HEIGHT, tileSet);
-        wfcAlgorithm = new WFCAlgorithm(wfcGrid, 42);
-        Console.WriteLine(wfcAlgorithm.Status);
-        wfcAlgorithm.Run();
-        Console.WriteLine(wfcAlgorithm.Status);
-
-        // Build the models list from the collapsed grid (skip empty tiles)
-        var modelList = new List<(Model model, Matrix world)>();
-
-        if (wfcAlgorithm.Status == WFCStatus.Contradiction)
-        {
-            Console.WriteLine("WFC hit a contradiction - rules may be incomplete or conflicting");
-            models = modelList.ToArray();
-            return;
-        }
-
-        for (int y = 0; y < WFC_GRID_HEIGHT; y++)
-        {
-            for (int x = 0; x < WFC_GRID_WIDTH; x++)
-            {
-                WFCCell cell = wfcGrid.GetCell(x, y);
-                WFCTileVariant? variant = cell.CollapsedVariant;
-
-                // Skip uncollapsed or empty tiles
-                if (variant == null || variant.ModelAssetName == "empty")
-                    continue;
-
-                Model model = Core.Content.Load<Model>(variant.ModelAssetName);
-                Vector3 position = new Vector3(x * TILE_SIZE, 0, y * TILE_SIZE);
-                Matrix rotation = Matrix.CreateRotationY(MathHelper.ToRadians(-variant.RotationDegrees));
-                Matrix world = rotation * Matrix.CreateTranslation(position);
-
-                modelList.Add((model, world));
-            }
-        }
-        models = modelList.ToArray();
+        // Empty models array - ready for new pipeline
+        models = Array.Empty<(Model, Matrix)>();
     }
 
     protected Vector3 GetCamTarget()
@@ -149,35 +102,10 @@ public class WFCPlayGroundScene : Scene
 
         MouseState mouseMonitorPosition = Mouse.GetState();
 
-        // Full screen
-        // viewPort X: 0
-        // viewPort Y: 0
-        // viewPort Width: 2560
-        // viewPort Height: 1440
-        // MouseState X: 1280
-        // MouseState Y: 720
-        //
-        // Windowed
-        // viewPort X: 0 // viewport X and Y seem to always be 0 on wayland
-        // viewPort Y: 0
-        // viewPort Width: 800 // viewport seems to be the size of the window
-        // viewPort Height: 480
-        // MouseState X: 1900 // mouse state seems to be relative to the monitor
-        // MouseState Y: 861
-        // Delta X: -1500
-        // Delta Y: -621
-        // Setting mouse to X400
-        // Setting mouse to Y240
-
-        // To solve this we would need access to the monitors resolution.
-        // and the location of the game window which doesnt seem to be available
-        // on wayland.  So instead we track the last known mouse position.
-        // and use that as the delta.
         if (mouseMonitorPosition.X != lastMousePosition.X || mouseMonitorPosition.Y != lastMousePosition.Y)
         {
             int mouseCenterDeltaY = lastMousePosition.Y - mouseMonitorPosition.Y;
             int mouseCenterDeltaX = lastMousePosition.X - mouseMonitorPosition.X;
-
 
             // Ignore huge deltas (likely from window focus)
             if (Math.Abs(mouseCenterDeltaX) > 100 || Math.Abs(mouseCenterDeltaY) > 100)
@@ -254,4 +182,3 @@ public class WFCPlayGroundScene : Scene
         }
     }
 }
-

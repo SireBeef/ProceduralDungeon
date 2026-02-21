@@ -1,18 +1,20 @@
 using System;
+using System.Linq;
 using MonoGameLibrary.WFC.Core;
-using MonoGameLibrary.WFC.Edges;
-using MonoGameLibrary.WFC.Tiles;
 using Xunit;
 
 namespace MonoGameLibrary.Tests.WFC.Core;
+
+public enum SingleTile { Floor }
 
 public class WFCAlgorithmTests
 {
     [Fact]
     public void WFCAlgorithmConstructor_WhenCreated_StatusIsRunning()
     {
-        var grid = CreateSimpleGrid();
-        var algorithm = new WFCAlgorithm(grid, seed: 42);
+        var grid = new WFCGrid<TestTile>(3, 3);
+        var rules = CreateAllConnectRules();
+        var algorithm = new WFCAlgorithm<TestTile>(grid, rules, seed: 42);
 
         Assert.Equal(WFCStatus.Running, algorithm.Status);
     }
@@ -20,8 +22,9 @@ public class WFCAlgorithmTests
     [Fact]
     public void WFCAlgorithmStep_WhenCalled_CollapsesAtLeastOneCell()
     {
-        var grid = CreateMultiVariantGrid();
-        var algorithm = new WFCAlgorithm(grid, seed: 42);
+        var grid = new WFCGrid<TestTile>(3, 3);
+        var rules = CreateAllConnectRules();
+        var algorithm = new WFCAlgorithm<TestTile>(grid, rules, seed: 42);
         var initialCollapsedCount = CountCollapsedCells(grid);
 
         algorithm.Step();
@@ -31,10 +34,11 @@ public class WFCAlgorithmTests
     }
 
     [Fact]
-    public void WFCAlgorithmRun_WhenTileSetIsCompatible_CompletesSuccessfully()
+    public void WFCAlgorithmRun_WhenRulesAreCompatible_CompletesSuccessfully()
     {
-        var grid = CreateCompatibleGrid();
-        var algorithm = new WFCAlgorithm(grid, seed: 42);
+        var grid = new WFCGrid<TestTile>(4, 4);
+        var rules = CreateAllConnectRules();
+        var algorithm = new WFCAlgorithm<TestTile>(grid, rules, seed: 42);
 
         var status = algorithm.Run();
 
@@ -45,23 +49,25 @@ public class WFCAlgorithmTests
     [Fact]
     public void WFCAlgorithmRun_WhenCompleted_AllCellsAreCollapsed()
     {
-        var grid = CreateCompatibleGrid();
-        var algorithm = new WFCAlgorithm(grid, seed: 42);
+        var grid = new WFCGrid<TestTile>(4, 4);
+        var rules = CreateAllConnectRules();
+        var algorithm = new WFCAlgorithm<TestTile>(grid, rules, seed: 42);
 
         algorithm.Run();
 
         foreach (var cell in grid.AllCells())
         {
             Assert.True(cell.IsCollapsed);
-            Assert.NotNull(cell.CollapsedVariant);
+            Assert.NotNull(cell.CollapsedTile);
         }
     }
 
     [Fact]
     public void WFCAlgorithmStep_WhenAlreadyCompleted_ReturnsCompleted()
     {
-        var grid = CreateCompatibleGrid();
-        var algorithm = new WFCAlgorithm(grid, seed: 42);
+        var grid = new WFCGrid<TestTile>(4, 4);
+        var rules = CreateAllConnectRules();
+        var algorithm = new WFCAlgorithm<TestTile>(grid, rules, seed: 42);
         algorithm.Run();
 
         var status = algorithm.Step();
@@ -72,152 +78,99 @@ public class WFCAlgorithmTests
     [Fact]
     public void WFCAlgorithmRun_WhenCalledWithSameSeed_ProducesSameResult()
     {
-        var grid1 = CreateCompatibleGrid();
-        var algorithm1 = new WFCAlgorithm(grid1, seed: 123);
+        var rules = CreateAllConnectRules();
+
+        var grid1 = new WFCGrid<TestTile>(4, 4);
+        var algorithm1 = new WFCAlgorithm<TestTile>(grid1, rules, seed: 123);
         algorithm1.Run();
 
-        var grid2 = CreateCompatibleGrid();
-        var algorithm2 = new WFCAlgorithm(grid2, seed: 123);
+        var grid2 = new WFCGrid<TestTile>(4, 4);
+        var algorithm2 = new WFCAlgorithm<TestTile>(grid2, rules, seed: 123);
         algorithm2.Run();
 
         for (int x = 0; x < grid1.Width; x++)
         {
             for (int y = 0; y < grid1.Height; y++)
             {
-                var variant1 = grid1.GetCell(x, y).CollapsedVariant;
-                var variant2 = grid2.GetCell(x, y).CollapsedVariant;
-                Assert.Equal(variant1?.Id, variant2?.Id);
+                var tile1 = grid1.GetCell(x, y).CollapsedTile;
+                var tile2 = grid2.GetCell(x, y).CollapsedTile;
+                Assert.Equal(tile1, tile2);
             }
         }
     }
 
     [Fact]
-    public void WFCAlgorithmRun_WhenPropagating_RemovesIncompatibleVariants()
+    public void WFCAlgorithmRun_WhenSingleTileEnum_AllCellsGetThatTile()
     {
-        var tileSet = new WFCTileSet();
+        var rules = new WFCAdjacencyRules<SingleTile>();
+        rules.AddRule(SingleTile.Floor, Direction.North, SingleTile.Floor);
+        rules.AddRule(SingleTile.Floor, Direction.East, SingleTile.Floor);
+        rules.AddRule(SingleTile.Floor, Direction.South, SingleTile.Floor);
+        rules.AddRule(SingleTile.Floor, Direction.West, SingleTile.Floor);
 
-        // Only floor tiles that connect to floor
-        var floorEdges = new Dictionary<Direction, WFCEdge>
-        {
-            { Direction.North, new WFCEdge(new[] { "floor" }) },
-            { Direction.East, new WFCEdge(new[] { "floor" }) },
-            { Direction.South, new WFCEdge(new[] { "floor" }) },
-            { Direction.West, new WFCEdge(new[] { "floor" }) }
-        };
-        tileSet.AddTile(new WFCTile("floor", floorEdges, new[] { 0 }, "Models/floor"));
+        var grid = new WFCGrid<SingleTile>(3, 3);
+        var algorithm = new WFCAlgorithm<SingleTile>(grid, rules, seed: 42);
 
-        var grid = new WFCGrid(3, 3, tileSet);
-        var algorithm = new WFCAlgorithm(grid, seed: 42);
+        var status = algorithm.Run();
 
-        algorithm.Run();
-
-        // All cells should be the same floor tile since that's all that's compatible
+        Assert.Equal(WFCStatus.Completed, status);
         foreach (var cell in grid.AllCells())
         {
-            Assert.Equal("floor_rot0", cell.CollapsedVariant?.Id);
+            Assert.Equal(SingleTile.Floor, cell.CollapsedTile);
         }
     }
 
     [Fact]
-    public void WFCAlgorithmStatus_WhenTilesAreSelfCompatible_Completes()
+    public void WFCAlgorithmRun_WhenTwoSelfCompatibleTypes_Completes()
     {
-        // Create two tile types that are each self-compatible but mutually exclusive
-        var tileSet = new WFCTileSet();
+        // Two tile types that are each self-compatible but mutually exclusive
+        var rules = new WFCAdjacencyRules<TestTile>();
 
-        // tile1 only accepts other tile1 tiles (by ID)
-        var tile1Edges = new Dictionary<Direction, WFCEdge>
-        {
-            { Direction.North, new WFCEdge(new[] { "tile1" }) },
-            { Direction.East, new WFCEdge(new[] { "tile1" }) },
-            { Direction.South, new WFCEdge(new[] { "tile1" }) },
-            { Direction.West, new WFCEdge(new[] { "tile1" }) }
-        };
-        tileSet.AddTile(new WFCTile("tile1", tile1Edges, new[] { 0 }, "Models/tile1"));
+        // Floor only connects to Floor
+        rules.AddRule(TestTile.Floor, Direction.North, TestTile.Floor);
+        rules.AddRule(TestTile.Floor, Direction.East, TestTile.Floor);
+        rules.AddRule(TestTile.Floor, Direction.South, TestTile.Floor);
+        rules.AddRule(TestTile.Floor, Direction.West, TestTile.Floor);
 
-        // tile2 only accepts other tile2 tiles (by ID)
-        var tile2Edges = new Dictionary<Direction, WFCEdge>
-        {
-            { Direction.North, new WFCEdge(new[] { "tile2" }) },
-            { Direction.East, new WFCEdge(new[] { "tile2" }) },
-            { Direction.South, new WFCEdge(new[] { "tile2" }) },
-            { Direction.West, new WFCEdge(new[] { "tile2" }) }
-        };
-        tileSet.AddTile(new WFCTile("tile2", tile2Edges, new[] { 0 }, "Models/tile2"));
+        // Wall only connects to Wall
+        rules.AddRule(TestTile.Wall, Direction.North, TestTile.Wall);
+        rules.AddRule(TestTile.Wall, Direction.East, TestTile.Wall);
+        rules.AddRule(TestTile.Wall, Direction.South, TestTile.Wall);
+        rules.AddRule(TestTile.Wall, Direction.West, TestTile.Wall);
 
-        var grid = new WFCGrid(2, 2, tileSet);
-        var algorithm = new WFCAlgorithm(grid, seed: 42);
+        var grid = new WFCGrid<TestTile>(2, 2);
+        var algorithm = new WFCAlgorithm<TestTile>(grid, rules, seed: 42);
 
         var status = algorithm.Run();
 
-        // Should complete because propagation will force all cells to same tile type
-        // Both tiles are self-compatible, so once one is chosen, all neighbors get the same
+        // Should complete because propagation forces all cells to same tile type
         Assert.Equal(WFCStatus.Completed, status);
     }
 
-    private static WFCGrid CreateSimpleGrid()
+    /// <summary>
+    /// Creates rules where every tile type can be adjacent to every tile type in all directions.
+    /// </summary>
+    private static WFCAdjacencyRules<TestTile> CreateAllConnectRules()
     {
-        return new WFCGrid(3, 3, CreateTestTileSet());
+        var rules = new WFCAdjacencyRules<TestTile>();
+        var allTiles = Enum.GetValues<TestTile>();
+        var allDirections = new[] { Direction.North, Direction.East, Direction.South, Direction.West };
+
+        foreach (var tile in allTiles)
+        {
+            foreach (var dir in allDirections)
+            {
+                foreach (var neighbor in allTiles)
+                {
+                    rules.AddRule(tile, dir, neighbor);
+                }
+            }
+        }
+
+        return rules;
     }
 
-    private static WFCGrid CreateMultiVariantGrid()
-    {
-        var tileSet = new WFCTileSet();
-
-        // Multiple compatible tiles so cells start uncollapsed
-        var floor1Edges = new Dictionary<Direction, WFCEdge>
-        {
-            { Direction.North, new WFCEdge(new[] { "open" }) },
-            { Direction.East, new WFCEdge(new[] { "open" }) },
-            { Direction.South, new WFCEdge(new[] { "open" }) },
-            { Direction.West, new WFCEdge(new[] { "open" }) }
-        };
-        tileSet.AddTile(new WFCTile("floor1", floor1Edges, new[] { 0 }, "Models/floor1"));
-
-        var floor2Edges = new Dictionary<Direction, WFCEdge>
-        {
-            { Direction.North, new WFCEdge(new[] { "open" }) },
-            { Direction.East, new WFCEdge(new[] { "open" }) },
-            { Direction.South, new WFCEdge(new[] { "open" }) },
-            { Direction.West, new WFCEdge(new[] { "open" }) }
-        };
-        tileSet.AddTile(new WFCTile("floor2", floor2Edges, new[] { 0 }, "Models/floor2"));
-
-        return new WFCGrid(3, 3, tileSet);
-    }
-
-    private static WFCGrid CreateCompatibleGrid()
-    {
-        var tileSet = new WFCTileSet();
-
-        var floorEdges = new Dictionary<Direction, WFCEdge>
-        {
-            { Direction.North, new WFCEdge(new[] { "open" }) },
-            { Direction.East, new WFCEdge(new[] { "open" }) },
-            { Direction.South, new WFCEdge(new[] { "open" }) },
-            { Direction.West, new WFCEdge(new[] { "open" }) }
-        };
-        tileSet.AddTile(new WFCTile("floor", floorEdges, new[] { 0 }, "Models/floor"));
-
-        return new WFCGrid(4, 4, tileSet);
-    }
-
-    private static WFCTileSet CreateTestTileSet()
-    {
-        var tileSet = new WFCTileSet();
-
-        var floorEdges = new Dictionary<Direction, WFCEdge>
-        {
-            { Direction.North, new WFCEdge(new[] { "floor" }) },
-            { Direction.East, new WFCEdge(new[] { "floor" }) },
-            { Direction.South, new WFCEdge(new[] { "floor" }) },
-            { Direction.West, new WFCEdge(new[] { "floor" }) }
-        };
-        tileSet.AddTile(new WFCTile("floor", floorEdges, new[] { 0 }, "Models/floor"));
-
-        return tileSet;
-    }
-
-    private static int CountCollapsedCells(WFCGrid grid)
+    private static int CountCollapsedCells<T>(WFCGrid<T> grid) where T : struct, Enum
     {
         int count = 0;
         foreach (var cell in grid.AllCells())
