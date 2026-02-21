@@ -32,28 +32,25 @@ public static class TileSetLoader
 
         foreach (var tileDef in definition.Tiles)
         {
-            var tile = CreateTile(tileDef);
-            tileSet.AddTile(tile);
+            var edges = new Dictionary<Direction, WFCEdge>
+            {
+                { Direction.North, new WFCEdge(tileDef.Edges.North) },
+                { Direction.East, new WFCEdge(tileDef.Edges.East) },
+                { Direction.South, new WFCEdge(tileDef.Edges.South) },
+                { Direction.West, new WFCEdge(tileDef.Edges.West) }
+            };
+
+            var variant = new WFCTileVariant(
+                id: tileDef.Id,
+                parentTile: null,
+                rotationDegrees: tileDef.Rotation,
+                edges: edges,
+                modelAssetName: tileDef.Model
+            );
+
+            tileSet.AddVariant(variant);
         }
 
         return tileSet;
-    }
-
-    private static WFCTile CreateTile(TileDefinition tileDef)
-    {
-        var edges = new Dictionary<Direction, WFCEdge>
-        {
-            { Direction.North, new WFCEdge(tileDef.Edges.North) },
-            { Direction.East, new WFCEdge(tileDef.Edges.East) },
-            { Direction.South, new WFCEdge(tileDef.Edges.South) },
-            { Direction.West, new WFCEdge(tileDef.Edges.West) }
-        };
-
-        return new WFCTile(
-            tileDef.Id,
-            edges,
-            tileDef.Rotations,
-            tileDef.Model
-        );
     }
 }

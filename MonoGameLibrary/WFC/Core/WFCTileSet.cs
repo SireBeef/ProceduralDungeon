@@ -35,6 +35,12 @@ public class WFCTileSet
         _variantsGenerated = false;
     }
 
+    public void AddVariant(WFCTileVariant variant)
+    {
+        _variants.Add(variant);
+        _variantsGenerated = true;
+    }
+
     private void GenerateVariants()
     {
         _variants.Clear();

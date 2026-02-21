@@ -1,0 +1,11 @@
+Current implementation:
+
+Right now we have a generator build a rule set based off of a definition in an editor that uses the actual 3d models.  This is not how the original WFC algorithm works, and probably not how we will want it to work going forward.
+
+What we should be doing is actually do the bitmap definition like the original algorithm and use that to build the simple ruleset.
+Then what we should do is make a second pass where we then fill each pixel in based upon the context.
+
+For example, think of a binary ruleset.  pass 1 would build the map in black and white. pass 2 would then determine what pixels of that map get mapped to walls, corners, etc.
+
+so second phase would look something like, its a wall if the north and south are empty, or if the norht is empty and the south is a floor.
+its a corner tile if N, W, NW, and SE is empty and E and S are walls.

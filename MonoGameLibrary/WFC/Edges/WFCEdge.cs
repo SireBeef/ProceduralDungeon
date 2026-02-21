@@ -30,19 +30,10 @@ public class WFCEdge
     }
 
     /// <summary>
-    /// Checks if this edge accepts the given variant ID.
-    /// Matches if:
-    /// - The exact variant ID is in the allowed list (e.g., "wall_rot0")
-    /// - The base tile ID is in the allowed list (e.g., "wall" matches "wall_rot90")
+    /// Checks if this edge accepts the given variant ID (exact match).
     /// </summary>
     public bool Accepts(string variantId)
     {
-        // Exact match (e.g., allowed has "wall_rot0" and variantId is "wall_rot0")
-        if (Allowed.Contains(variantId))
-            return true;
-
-        // Base ID match (e.g., allowed has "wall" and variantId is "wall_rot90")
-        string baseId = SocketRotation.GetBaseName(variantId);
-        return Allowed.Contains(baseId);
+        return Allowed.Contains(variantId);
     }
 }

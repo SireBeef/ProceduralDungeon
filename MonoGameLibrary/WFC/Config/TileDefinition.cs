@@ -17,8 +17,8 @@ public class TileDefinition
     [JsonPropertyName("model")]
     public string Model { get; set; } = string.Empty;
 
-    [JsonPropertyName("rotations")]
-    public List<int> Rotations { get; set; } = new() { 0 };
+    [JsonPropertyName("rotation")]
+    public int Rotation { get; set; } = 0;
 
     [JsonPropertyName("edges")]
     public EdgeDefinitions Edges { get; set; } = new();
