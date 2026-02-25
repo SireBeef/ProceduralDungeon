@@ -248,7 +248,9 @@ public class BitmapEditorScene : Scene
                 grid.Layout[x, y] = _outputGrid[x, y] ?? BitmapTile.Empty;
 
         var modelAssignmentPass = new ModelAssignmentPass("Content/passes/model_assignment.json");
-        var pipeline = new DungeonPipeline().Add(modelAssignmentPass);
+        var pipeline = new DungeonPipeline()
+            .Add(modelAssignmentPass)
+            .Add(new FloorFillPass());
         pipeline.Run(grid);
 
         Core.ChangeScene(new WFCPlayGroundScene(grid, modelAssignmentPass.TileSize));
