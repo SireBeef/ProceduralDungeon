@@ -27,7 +27,7 @@ public class BitmapEditorScene : Scene
     private static readonly Dictionary<BitmapTile, Color> TileColors = new()
     {
         { BitmapTile.Empty, new Color(40, 40, 40) },
-        { BitmapTile.Floor, Color.White },
+        { BitmapTile.Wall, Color.White },
     };
 
     // Reference grid the user paints on
@@ -247,11 +247,11 @@ public class BitmapEditorScene : Scene
             for (int y = 0; y < OUTPUT_HEIGHT; y++)
                 grid.Layout[x, y] = _outputGrid[x, y] ?? BitmapTile.Empty;
 
-        var pass = new ModelAssignmentPass("Content/passes/model_assignment.json");
-        var pipeline = new DungeonPipeline().Add(pass);
+        var modelAssignmentPass = new ModelAssignmentPass("Content/passes/model_assignment.json");
+        var pipeline = new DungeonPipeline().Add(modelAssignmentPass);
         pipeline.Run(grid);
 
-        Core.ChangeScene(new WFCPlayGroundScene(grid, pass.TileSize));
+        Core.ChangeScene(new WFCPlayGroundScene(grid, modelAssignmentPass.TileSize));
     }
 
     private void EnterTypingMode()

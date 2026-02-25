@@ -30,13 +30,13 @@ public class ModelAssignmentPass : IDungeonPass
         {
             for (int x = 0; x < grid.Width; x++)
             {
-                var center = grid.Layout[x, y];
-                var north = GetTile(grid, x, y - 1);
-                var east = GetTile(grid, x + 1, y);
-                var south = GetTile(grid, x, y + 1);
-                var west = GetTile(grid, x - 1, y);
+                BitmapTile center = grid.Layout[x, y];
+                BitmapTile north = GetTile(grid, x, y - 1);
+                BitmapTile east = GetTile(grid, x + 1, y);
+                BitmapTile south = GetTile(grid, x, y + 1);
+                BitmapTile west = GetTile(grid, x - 1, y);
 
-                foreach (var rule in _rules)
+                foreach (PatternRule rule in _rules)
                 {
                     if (rule.Matches(center, north, east, south, west))
                     {

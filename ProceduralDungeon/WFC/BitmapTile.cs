@@ -1,3 +1,3 @@
 namespace ProceduralDungeon.WFC;
 
-public enum BitmapTile { Empty, Floor }
+public enum BitmapTile { Empty, Wall }
